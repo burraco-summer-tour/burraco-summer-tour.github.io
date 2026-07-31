@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Burraco Summer Tour — Classifiche</title>
+<meta name="description" content="Classifiche del circuito di burraco a coppie Summer Tour: coppie, singoli, fedeltà e finalisti.">
+<meta name="theme-color" content="#0E3B33" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#061210" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* ============================================================
+   TAVOLO VERDE — sistema visivo
+   il panno del tavolo · la carta avorio · l'ottone · il carminio
+   ============================================================ */
+:root{
+  --paper:#EFE8DA;        /* il tavolo attorno alle carte */
+  --card:#FCF9F3;         /* la faccia della carta */
+  --card-2:#F5EFE3;       /* fasce e campi */
+  --felt:#0E3B33;         /* il panno */
+  --felt-2:#15574A;
+  --ink:#17211F;
+  --ink-soft:#5F6E6A;
+  --line:rgba(23,33,31,.13);
+  --line-soft:rgba(23,33,31,.07);
+  --brass:#9A6F16;        /* i punti di classifica */
+  --brass-lit:#D6A63E;
+  --carmine:#A5262C;
+  --verdant:#1B6F51;
+  --gold:#C9962F; --silver:#8C9AA0; --bronze:#B0713F;
+  --on-felt:#EFF5F1;
+  --on-felt-soft:rgba(239,245,241,.62);
+
+  --r-lg:20px; --r-md:14px; --r-sm:10px;
+  --shadow-card:0 1px 2px rgba(23,33,31,.05), 0 8px 24px -12px rgba(23,33,31,.22);
+  --shadow-lift:0 2px 6px rgba(23,33,31,.07), 0 18px 40px -18px rgba(23,33,31,.34);
+  --ease:cubic-bezier(.22,.8,.2,1);
+  --wrap:min(100% - 32px, 980px);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0B1614; --card:#122220; --card-2:#182C28;
+    --felt:#061210; --felt-2:#0E2B25;
+    --ink:#EDF3F0; --ink-soft:#93A6A0;
+    --line:rgba(255,255,255,.11); --line-soft:rgba(255,255,255,.06);
+    --brass:#E0B863; --brass-lit:#F0D08C;
+    --carmine:#EB8078; --verdant:#5CC796;
+    --gold:#D9AE4E; --silver:#A6B3B8; --bronze:#C08551;
+    --shadow-card:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+    --shadow-lift:0 2px 8px rgba(0,0,0,.45), 0 22px 46px -20px rgba(0,0,0,.8);
+  }
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Schibsted Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.45;
+  padding-bottom:calc(56px + env(safe-area-inset-bottom,0px));
+}
+h1,h2,h3{margin:0; font-family:"Fraunces","Iowan Old Style",Georgia,serif; font-weight:700; letter-spacing:-.01em}
+p{margin:0}
+a{color:var(--brass); text-underline-offset:3px}
+:focus-visible{outline:2.5px solid var(--brass-lit); outline-offset:2px; border-radius:6px}
+.wrap{width:var(--wrap); margin-inline:auto}
+.muted{color:var(--ink-soft)}
+
+/* ---------- IL PANNO ---------- */
+.table-top{position:relative; isolation:isolate; overflow:hidden; color:var(--on-felt)}
+.felt{
+  position:absolute; inset:0; z-index:-1;
+  background:
+    radial-gradient(120% 80% at 50% -20%, rgba(255,255,255,.13), transparent 62%),
+    repeating-linear-gradient(45deg,  rgba(255,255,255,.030) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.055) 0 1px, transparent 1px 5px),
+    linear-gradient(168deg, var(--felt-2), var(--felt) 68%);
+  border-bottom:1px solid rgba(0,0,0,.35);
+  box-shadow:inset 0 -14px 26px -18px rgba(0,0,0,.8);
+}
+/* la luce sul tavolo, che si sposta piano */
+.felt::after{
+  content:""; position:absolute; inset:-30%;
+  background:radial-gradient(38% 46% at 30% 24%, rgba(255,255,255,.11), transparent 70%);
+  animation:drift 26s ease-in-out infinite alternate;
+}
+@keyframes drift{ from{transform:translate3d(-6%,-3%,0)} to{transform:translate3d(10%,5%,0)} }
+
+.masthead{padding:26px 0 24px; display:flex; align-items:flex-start; gap:16px}
+.eyebrow{
+  font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--on-felt-soft); margin-bottom:8px;
+}
+.masthead h1{font-size:clamp(30px,8.5vw,46px); line-height:1.02; color:#fff}
+.masthead h1 em{
+  display:block; font-style:normal; font-weight:600;
+  color:var(--brass-lit); letter-spacing:-.02em;
+}
+.tourstats{
+  margin-top:14px; display:flex; flex-wrap:wrap; gap:8px 18px;
+  font-size:14px; color:var(--on-felt-soft);
+}
+.tourstats b{color:var(--on-felt); font-weight:600; font-variant-numeric:tabular-nums}
+.icon-btn{
+  margin-left:auto; flex:0 0 auto; width:42px; height:42px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.07);
+  color:var(--on-felt); font-size:18px; cursor:pointer;
+  display:grid; place-items:center; transition:background .2s, border-color .2s, transform .2s var(--ease);
+}
+.icon-btn:hover{background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.4)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn.spin{animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---------- BARRA DELLE SEZIONI (si aggancia in alto) ---------- */
+.tabs-wrap{position:sticky; top:0; z-index:30; transition:box-shadow .3s}
+.tabs-wrap::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:var(--felt); opacity:0; transition:opacity .3s;
+}
+body.scrolled .tabs-wrap::before{opacity:1}
+body.scrolled .tabs-wrap{box-shadow:0 10px 30px -18px rgba(0,0,0,.75)}
+.tabs-inner{display:flex; align-items:center; gap:12px}
+.minibrand{
+  display:flex; align-items:center; gap:8px; white-space:nowrap; overflow:hidden;
+  max-width:0; opacity:0; transition:max-width .4s var(--ease), opacity .25s;
+  font-family:"Fraunces",Georgia,serif; font-weight:700; font-size:16px; color:#fff;
+}
+body.scrolled .minibrand{max-width:220px; opacity:1}
+@media (max-width:600px){ .minibrand{display:none} }
+.tabs{
+  position:relative; display:flex; gap:2px; overflow-x:auto; scrollbar-width:none;
+  -webkit-overflow-scrolling:touch; padding:6px 0 10px;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  position:relative; z-index:1; flex:0 0 auto; border:0; background:none; cursor:pointer;
+  padding:9px 15px; border-radius:999px; font:inherit; font-size:15px; font-weight:600;
+  color:var(--on-felt-soft); transition:color .25s;
+}
+.tab:hover{color:var(--on-felt)}
+.tab.active{color:var(--felt)}
+@media (prefers-color-scheme: dark){ .tab.active{color:#0B1614} }
+.ink{
+  position:absolute; z-index:0; top:6px; left:0; width:0; height:38px; border-radius:999px;
+  background:var(--brass-lit); box-shadow:0 4px 14px -6px rgba(0,0,0,.6);
+  transition:transform .42s var(--ease), width .42s var(--ease);
+}
+
+/* ---------- STRUMENTI ---------- */
+main{padding-top:22px}
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.search{
+  flex:1 1 240px; display:flex; align-items:center; gap:10px;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-md);
+  padding:12px 14px; box-shadow:var(--shadow-card);
+  transition:border-color .2s, box-shadow .25s var(--ease), transform .25s var(--ease);
+}
+.search:focus-within{border-color:var(--brass); box-shadow:var(--shadow-lift); transform:translateY(-1px)}
+.search svg{flex:0 0 auto; color:var(--ink-soft)}
+.search input{
+  flex:1; min-width:0; border:0; outline:0; background:none; color:var(--ink);
+  font:inherit; font-size:17px;
+}
+.search input::placeholder{color:var(--ink-soft)}
+.clear{
+  border:0; background:var(--card-2); color:var(--ink-soft); cursor:pointer;
+  width:26px; height:26px; border-radius:50%; font-size:13px; line-height:1;
+  display:grid; place-items:center; transition:background .2s, color .2s, transform .2s var(--ease);
+}
+.clear:hover{background:var(--carmine); color:#fff}
+.clear:active{transform:scale(.88)}
+.clear[hidden]{display:none}   /* senza questa, display:grid vince sull'attributo hidden */
+select.pick{
+  appearance:none; font:inherit; font-size:15px; font-weight:600; cursor:pointer;
+  padding:12px 38px 12px 14px; border-radius:var(--r-md);
+  border:1px solid var(--line); background-color:var(--card); color:var(--ink);
+  box-shadow:var(--shadow-card); transition:border-color .2s;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);
+  background-position:calc(100% - 19px) 51%, calc(100% - 13px) 51%;
+  background-size:6px 6px, 6px 6px; background-repeat:no-repeat;
+}
+select.pick:hover{border-color:var(--brass)}
+.resultline{
+  margin:12px 2px 0; font-size:14px; color:var(--ink-soft); min-height:20px;
+  animation:fade .3s var(--ease) both;
+}
+.resultline b{color:var(--ink); font-weight:600}
+
+/* ---------- IL PODIO: tre carte servite sul tavolo ---------- */
+/* minmax(0,…): senza questo le colonne non si stringono e il podio sfonda lo schermo */
+.podium{display:grid; gap:12px; margin-top:20px; grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:720px){
+  .podium{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr); gap:16px; align-items:end}
+}
+.pcard{
+  position:relative; overflow:hidden; isolation:isolate;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:16px 16px 14px; box-shadow:var(--shadow-card);
+  transition:transform .35s var(--ease), box-shadow .35s var(--ease);
+  animation:deal .72s var(--ease) both; animation-delay:calc(var(--d) * 110ms);
+}
+.pcard.p1{grid-column:1 / -1; --medal:var(--gold)}
+.pcard.p2{--medal:var(--silver)}
+.pcard.p3{--medal:var(--bronze)}
+@media (min-width:720px){ .pcard.p1{grid-column:auto; padding:22px 20px 18px} }
+.pcard:hover{transform:translateY(-6px); box-shadow:var(--shadow-lift)}
+.pcard::before{ /* il filetto del piazzamento */
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  box-shadow:inset 0 0 0 2px var(--medal); opacity:.55;
+}
+.index{
+  display:flex; align-items:baseline; gap:6px; color:var(--medal);
+  font-family:"Fraunces",Georgia,serif; font-weight:700; line-height:1;
+}
+.index b{font-size:30px}
+.pcard.p1 .index b{font-size:40px}
+.index i{font-style:normal; font-size:17px; opacity:.85}
+.pnames{margin-top:12px}
+.pnames p{font-weight:600; font-size:15px; letter-spacing:-.01em; line-height:1.25; overflow-wrap:anywhere}
+.pcard.p1 .pnames p{font-size:18px}
+.pnames p + p{color:var(--ink-soft); font-weight:500; margin-top:2px}
+.pscore{
+  margin-top:12px; padding-top:10px; border-top:1px solid var(--line-soft);
+  display:flex; align-items:baseline; flex-wrap:wrap; gap:2px 6px;
+}
+.pscore b{
+  font-family:"Fraunces",Georgia,serif; font-size:24px; color:var(--brass);
+  font-variant-numeric:tabular-nums; line-height:1;
+}
+.pcard.p1 .pscore b{font-size:30px}
+.pscore small{font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft)}
+.pscore .sep{margin-left:auto; font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums}
+/* il lucido che attraversa la carta del primo posto */
+.pcard.p1 .shine{
+  position:absolute; top:0; bottom:0; width:44%; z-index:2; pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.42),transparent);
+  animation:sweep 6.5s ease-in-out 1.4s infinite;
+}
+@media (prefers-color-scheme: dark){
+  .pcard.p1 .shine{background:linear-gradient(100deg,transparent,rgba(255,255,255,.06),transparent)}
+}
+@keyframes sweep{ 0%{left:-50%} 55%,100%{left:120%} }
+@keyframes deal{
+  from{opacity:0; transform:translate3d(0,34px,0) rotate(var(--rot,0deg)) scale(.93)}
+  to{opacity:1; transform:none}
+}
+
+/* ---------- LA CLASSIFICA ---------- */
+.board-head{display:flex; align-items:baseline; gap:10px; margin:26px 2px 10px}
+.board-head h2{font-size:19px}
+.board-head .hint{margin-left:auto; font-size:13px; color:var(--ink-soft); text-align:right}
+.board{
+  list-style:none; margin:0; padding:0;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-card); overflow:hidden;
+}
+.brow{
+  position:relative; display:grid; gap:0 14px; align-items:center;
+  grid-template-columns:38px minmax(0,1fr) auto;
+  padding:13px 16px 13px 14px; border-bottom:1px solid var(--line-soft);
+  transition:background .22s;
+}
+.brow:last-child{border-bottom:0}
+.brow::before{ /* il filetto che compare al passaggio */
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px;
+  background:var(--brass-lit); transform:scaleY(0); transform-origin:center;
+  transition:transform .3s var(--ease);
+}
+.brow:hover{background:var(--card-2)}
+.brow:hover::before{transform:scaleY(1)}
+.brow.enter{animation:rise .5s var(--ease) both; animation-delay:calc(var(--i) * 26ms)}
+@keyframes rise{ from{opacity:0; transform:translate3d(0,12px,0)} to{opacity:1; transform:none} }
+@keyframes fade{ from{opacity:0} to{opacity:1} }
+
+.pos{
+  font-family:"Fraunces",Georgia,serif; font-weight:700; font-size:17px;
+  color:var(--ink-soft); text-align:right; font-variant-numeric:tabular-nums;
+}
+.brow.top1{--medal:var(--gold)} .brow.top2{--medal:var(--silver)} .brow.top3{--medal:var(--bronze)}
+.brow.top1 .pos,.brow.top2 .pos,.brow.top3 .pos{color:var(--medal)}
+.who{min-width:0}
+.nm{font-weight:600; letter-spacing:-.01em; line-height:1.25; overflow-wrap:anywhere}
+.nm2{color:var(--ink-soft); font-weight:500; line-height:1.25; overflow-wrap:anywhere}
+.meta{
+  margin-top:5px; display:flex; flex-wrap:wrap; gap:4px 12px;
+  font-size:13px; color:var(--ink-soft); font-variant-numeric:tabular-nums;
+}
+.mp.up{color:var(--verdant)} .mp.down{color:var(--carmine)}
+mark{background:rgba(214,166,62,.34); color:inherit; border-radius:3px; padding:0 1px}
+.badge{
+  display:inline-block; margin-left:6px; font-size:10.5px; font-weight:700;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--verdant);
+  border:1px solid currentColor; border-radius:999px; padding:1px 7px; vertical-align:1px;
+}
+.score{text-align:right; display:flex; flex-direction:column; align-items:flex-end; line-height:1}
+.score b{
+  font-family:"Fraunces",Georgia,serif; font-size:21px; color:var(--brass);
+  font-variant-numeric:tabular-nums;
+}
+.score small{
+  font-size:10.5px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-soft); margin-top:4px;
+}
+
+/* i quadratini delle presenze */
+.dots{display:flex; flex-wrap:wrap; gap:4px; margin-top:7px}
+.dot{
+  width:22px; height:22px; border-radius:7px; display:grid; place-items:center;
+  font-size:11px; font-weight:600; font-variant-numeric:tabular-nums;
+  background:var(--card-2); border:1px solid var(--line-soft); color:var(--ink-soft);
+  transition:transform .2s var(--ease);
+}
+.dot.on{background:var(--verdant); border-color:var(--verdant); color:#fff}
+@media (prefers-color-scheme: dark){ .dot.on{color:#08211A} }
+.brow:hover .dot.on{transform:translateY(-2px)}
+
+/* ---------- STATI ---------- */
+.note{margin:12px 4px 0; font-size:13px; color:var(--ink-soft)}
+.panel{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg);
+  padding:18px 20px; margin-top:20px; box-shadow:var(--shadow-card);
+  animation:fade .35s var(--ease) both;
+}
+.panel h2{font-size:18px; margin-bottom:6px}
+.panel p{color:var(--ink-soft); font-size:15px}
+.empty{
+  text-align:center; padding:48px 22px; margin-top:20px; background:var(--card);
+  border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-card);
+  animation:fade .35s var(--ease) both;
+}
+.empty .big{font-size:34px; margin-bottom:10px}
+.empty h2{font-size:19px; margin-bottom:6px}
+.empty p{color:var(--ink-soft); font-size:15px; max-width:34ch; margin-inline:auto}
+.skeleton{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-card); overflow:hidden; margin-top:20px;
+}
+.sk-row{display:flex; gap:14px; align-items:center; padding:16px; border-bottom:1px solid var(--line-soft)}
+.sk-row:last-child{border-bottom:0}
+.sk{
+  height:13px; border-radius:6px;
+  background:linear-gradient(90deg,var(--card-2) 25%,var(--line-soft) 37%,var(--card-2) 63%);
+  background-size:400% 100%; animation:shimmer 1.5s ease-in-out infinite;
+}
+@keyframes shimmer{ from{background-position:100% 0} to{background-position:0 0} }
+
+/* ---------- AREA ORGANIZZATORE ---------- */
+.admin-bar{margin-top:30px; display:none}
+.admin-bar.sbloccata{display:block}
+details.admin{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-lg);
+  overflow:hidden; box-shadow:var(--shadow-card);
+}
+details.admin>summary{
+  cursor:pointer; padding:16px 18px; font-weight:600; list-style:none;
+  display:flex; align-items:center; gap:10px;
+}
+details.admin>summary::-webkit-details-marker{display:none}
+details.admin>summary .tag{margin-left:auto}
+details.admin>summary::after{
+  content:"›"; font-size:22px; color:var(--ink-soft); transition:transform .3s var(--ease);
+}
+details.admin[open]>summary::after{transform:rotate(90deg)}
+details.admin[open]>summary{border-bottom:1px solid var(--line-soft)}
+.admin-body{padding:14px 18px 20px; animation:fade .3s var(--ease) both}
+.admin-body p.hint{font-size:14px; color:var(--ink-soft)}
+.field{margin:12px 0}
+.field label{display:block; font-size:13px; color:var(--ink-soft); margin-bottom:6px; font-weight:600}
+.field input,.field select{
+  width:100%; padding:11px 13px; border-radius:var(--r-sm); border:1px solid var(--line);
+  background:var(--card-2); color:var(--ink); font:inherit; font-size:16px; outline:0;
+  transition:border-color .2s, background .2s;
+}
+.field input:focus,.field select:focus{border-color:var(--brass); background:var(--card)}
+.row{display:flex; gap:10px; flex-wrap:wrap}
+.row>*{flex:1; min-width:130px}
+.section{border-top:1px solid var(--line-soft); margin-top:20px; padding-top:16px}
+.section h3{font-size:16px; margin-bottom:4px}
+.section p.hint{margin:0 0 12px; font-size:14px; color:var(--ink-soft)}
+.btn{
+  border:1px solid var(--line); background:var(--card-2); color:var(--ink);
+  padding:11px 16px; border-radius:var(--r-sm); font:inherit; font-size:15px; font-weight:600;
+  cursor:pointer; transition:transform .18s var(--ease), border-color .2s, background .2s, opacity .2s;
+}
+.btn:hover{border-color:var(--brass); background:var(--card)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5; cursor:default; transform:none}
+.btn.primary{background:var(--brass); border-color:var(--brass); color:#fff}
+@media (prefers-color-scheme: dark){ .btn.primary{color:#12220E} }
+.btn.primary:hover{background:var(--brass-lit); border-color:var(--brass-lit)}
+.status{font-size:14px; padding:11px 14px; border-radius:var(--r-sm); margin-top:12px; display:none}
+.status.show{display:block; animation:rise .35s var(--ease) both}
+.status.ok{background:rgba(27,111,81,.12); color:var(--verdant); border:1px solid var(--verdant)}
+.status.err{background:rgba(165,38,44,.12); color:var(--carmine); border:1px solid var(--carmine)}
+.status.info{background:var(--card-2); color:var(--ink-soft); border:1px solid var(--line)}
+.rowlist{margin-top:12px; max-height:290px; overflow:auto; border:1px solid var(--line); border-radius:var(--r-sm)}
+.rowlist .ri{display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--line-soft); font-size:15px}
+.rowlist .ri:last-child{border-bottom:0}
+.rowlist .ri .x{color:var(--carmine); cursor:pointer; font-weight:700; padding:0 6px; border-radius:6px}
+.rowlist .ri .x:hover{background:rgba(165,38,44,.12)}
+.tag{font-size:12px; color:var(--ink-soft); border:1px solid var(--line); border-radius:999px; padding:2px 9px; white-space:nowrap}
+.kbd{font-family:ui-monospace,Menlo,Consolas,monospace; background:var(--card-2); border:1px solid var(--line); border-radius:6px; padding:2px 7px; font-size:13px}
+
+/* correzione di un risultato già salvato: la riga si apre e diventa modificabile */
+.rowlist .ri .nomi{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.rowlist .ri .e{color:var(--ink-soft); cursor:pointer; padding:0 6px; border-radius:6px}
+.rowlist .ri .e:hover{background:var(--card-2); color:var(--brass)}
+.rowlist .ri .x.conf{color:#fff; background:var(--carmine); font-size:13px; font-weight:600; padding:3px 9px}
+.rowlist .ri.editing{background:var(--card-2); flex-wrap:wrap}
+.rowlist .ri .inp{
+  width:88px; padding:7px 9px; border-radius:8px; border:1px solid var(--line);
+  background:var(--card); color:var(--ink); font:inherit; font-size:15px; outline:0;
+}
+.rowlist .ri .inp:focus{border-color:var(--brass)}
+.btn.mini{padding:7px 11px; font-size:14px}
+/* il tasto che cambia il segno degli MP: sui telefoni la tastiera numerica non ha il meno */
+.mprow{display:flex; gap:8px; align-items:stretch}
+.mprow input{flex:1; min-width:0}
+.signbtn{flex:0 0 auto; width:54px; padding:0; font-size:19px; font-weight:700; line-height:1}
+.signbtn.neg{background:var(--carmine); border-color:var(--carmine); color:#fff}
+/* avviso su un criterio non ancora confermato dall'organizzatore */
+.daconfermare{
+  margin-top:12px; padding:11px 14px; border-radius:var(--r-sm); font-size:14px; line-height:1.55;
+  background:rgba(214,166,62,.14); border:1px solid var(--brass); color:var(--ink);
+}
+
+.footer{
+  width:var(--wrap); margin:34px auto 0; padding-top:20px; border-top:1px solid var(--line);
+  color:var(--ink-soft); font-size:13px; text-align:center; line-height:1.7;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div class="table-top">
+  <div class="felt"></div>
+
+  <div class="wrap masthead">
+    <div>
+      <p class="eyebrow">Circuito a tappe · Burraco a coppie</p>
+      <h1>Burraco <em id="tourName">Summer Tour</em></h1>
+      <p class="tourstats" id="tourStats">
+        <span><b data-count="-1">0</b> tappe giocate</span>
+        <span><b data-count="-1">0</b> giocatori</span>
+        <span><b data-count="-1">0</b> coppie</span>
+      </p>
+    </div>
+    <button class="icon-btn" id="refreshBtn" title="Aggiorna le classifiche" aria-label="Aggiorna le classifiche">↻</button>
+  </div>
+
+  <div class="tabs-wrap">
+    <div class="wrap tabs-inner">
+      <span class="minibrand" aria-hidden="true">🃏 <b id="miniName">Summer Tour</b></span>
+      <nav class="tabs" id="tabs" aria-label="Sezioni delle classifiche">
+        <span class="ink" id="ink" aria-hidden="true"></span>
+        <button class="tab active" data-tab="coppie">Coppie</button>
+        <button class="tab" data-tab="singoli">Singoli</button>
+        <button class="tab" data-tab="fedelta">Fedeltà</button>
+        <button class="tab" data-tab="finalisti">Finalisti</button>
+        <button class="tab" data-tab="tappe">Tappe</button>
+      </nav>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="toolbar">
+    <label class="search">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.6-3.6"></path>
+      </svg>
+      <input id="search" placeholder="Trova il tuo nome…" autocomplete="off" aria-label="Trova il tuo nome nella classifica">
+      <button class="clear" id="clearBtn" type="button" hidden aria-label="Cancella la ricerca">✕</button>
+    </label>
+    <select id="tappaSelect" class="pick" aria-label="Scegli la tappa" style="display:none"></select>
+  </div>
+  <p class="resultline" id="resultLine"></p>
+
+  <div id="view">
+    <div class="skeleton">
+      <div class="sk-row"><div class="sk" style="width:26px"></div><div class="sk" style="flex:1"></div><div class="sk" style="width:44px"></div></div>
+      <div class="sk-row"><div class="sk" style="width:26px"></div><div class="sk" style="flex:1"></div><div class="sk" style="width:44px"></div></div>
+      <div class="sk-row"><div class="sk" style="width:26px"></div><div class="sk" style="flex:1"></div><div class="sk" style="width:44px"></div></div>
+      <div class="sk-row"><div class="sk" style="width:26px"></div><div class="sk" style="flex:1"></div><div class="sk" style="width:44px"></div></div>
+      <div class="sk-row"><div class="sk" style="width:26px"></div><div class="sk" style="flex:1"></div><div class="sk" style="width:44px"></div></div>
+    </div>
+  </div>
+
+  <div class="admin-bar">
+    <details class="admin" id="adminBox">
+      <summary>🔐 Area organizzatore <span class="tag" id="adminState">non connesso</span></summary>
+      <div class="admin-body" id="adminBody"></div>
+    </details>
+  </div>
+</main>
+
+<div class="footer">
+  Dati salvati su GitHub · ogni modifica crea una copia di sicurezza permanente.<br>
+  <span id="footNote"></span>
+</div>
+
+<script>
+/* ============================================================
+   CONFIG — repository GitHub che ospita i dati
+   ============================================================ */
+const OWNER = "burraco-summer-tour";
+const REPO  = "burraco-summer-tour.github.io";
+const DATA_PATH = "data.json";
+
+/* Parola segreta del link organizzatore.
+   L'area organizzatore resta invisibile a chi apre il sito normalmente:
+   compare SOLO aprendo l'indirizzo con questa parola dopo il cancelletto, cioè
+   https://burraco-summer-tour.github.io/#gestione-salvo
+   Per cambiarla basta modificare la riga qui sotto (senza il cancelletto).
+   Nota: nasconde la porta, non la chiude a chiave — la vera protezione
+   resta il token GitHub, senza il quale nessuno può salvare nulla. */
+const ADMIN_HASH = "gestione-salvo";
+
+/* ============================================================
+   STATO
+   ============================================================ */
+let DATA = null;      // dati correnti
+let SHA  = null;      // sha del file data.json su GitHub (per il salvataggio)
+let TAB  = "coppie";
+let editRows = [];    // righe risultato in inserimento (tappa corrente admin)
+let confermaDup = ""; // doppione segnalato e in attesa di un secondo clic
+let pendingDel = -1;  // risultato salvato per cui si sta chiedendo conferma di cancellazione
+let ANIMATE = true;   // le righe entrano al cambio sezione, non a ogni lettera digitata
+let lastPodium = "";  // firma del podio: le carte si servono solo quando cambia davvero
+
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const token = {
+  get(){ return localStorage.getItem("bst_token") || ""; },
+  set(v){ v ? localStorage.setItem("bst_token",v) : localStorage.removeItem("bst_token"); }
+};
+/* La coda di inserimento vive anche fuori dalla pagina: se il telefono si blocca
+   o il browser ricarica a metà serata, le coppie già digitate sono ancora lì. */
+const QUEUE_KEY = "bst_coda";
+function saveQueue(){ try{ localStorage.setItem(QUEUE_KEY, JSON.stringify(editRows)); }catch(e){} }
+function loadQueue(){
+  try{ const v = JSON.parse(localStorage.getItem(QUEUE_KEY)||"[]"); return Array.isArray(v)?v:[]; }
+  catch(e){ return []; }
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+function normName(s){
+  if(s==null) return "";
+  return String(s).trim().replace(/\s+/g," ").replace(/[.\s]+$/,"").trim().toUpperCase();
+}
+function coppiaKey(a,b){ return [normName(a),normName(b)].sort().join(" / "); }
+function resolveName(n){ // applica gli alias (unione duplicati)
+  const a = (DATA.aliases||{}); n = normName(n);
+  let hops=0; while(a[n] && hops++<5){ n = normName(a[n]); }
+  return n;
+}
+function fmtMP(v){ v = Number(v)||0; return (v>0?"+":"")+v.toLocaleString("it-IT"); }
+/* Legge un numero scritto a mano com'è naturale scriverlo in italiano.
+   Serve perché "1.485" passato a parseInt diventerebbe 1, in silenzio:
+   qui accetta 1.485 · 1,485 · 1 485 · +1485 · -820 e restituisce sempre l'intero giusto. */
+function parseNum(v){
+  if(v==null) return NaN;
+  const s = String(v).trim();
+  if(!s) return NaN;
+  const neg = /^\s*-/.test(s);
+  const cifre = s.replace(/\D/g,"");
+  if(!cifre) return NaN;
+  const n = parseInt(cifre,10);
+  return neg ? -n : n;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function plural(n,uno,tanti){ return n===1?uno:tanti; }
+/* evidenzia dentro al nome la parte cercata */
+function hl(name,q){
+  const s = (name==null) ? "" : String(name);
+  if(!q) return esc(s);
+  const i = s.toUpperCase().indexOf(q);
+  if(i<0) return esc(s);
+  return esc(s.slice(0,i))+"<mark>"+esc(s.slice(i,i+q.length))+"</mark>"+esc(s.slice(i+q.length));
+}
+
+/* ============================================================
+   CARICAMENTO DATI
+   ============================================================ */
+async function loadData(){
+  // Con token: leggo via API GitHub (sempre aggiornato). Senza: leggo il file statico.
+  try{
+    if(token.get()){
+      const f = await ghGet(DATA_PATH);
+      if(f){ SHA = f.sha; DATA = JSON.parse(b64decode(f.content)); }
+    }
+    if(!DATA){
+      const r = await fetch("./"+DATA_PATH+"?ts="+Date.now(), {cache:"no-store"});
+      if(!r.ok) throw new Error("HTTP "+r.status);
+      DATA = await r.json();
+    }
+  }catch(e){
+    // fallback: prova comunque il file statico
+    try{ const r = await fetch("./"+DATA_PATH+"?ts="+Date.now(),{cache:"no-store"}); DATA = await r.json(); }
+    catch(e2){ DATA = null; }
+  }
+  if(DATA){
+    DATA.giocatori   = DATA.giocatori   || [];
+    DATA.tappe       = DATA.tappe       || [];
+    DATA.risultati   = DATA.risultati   || [];
+    DATA.aliases     = DATA.aliases     || {};
+    DATA.impostazioni= DATA.impostazioni|| {finalistiPercentuale:15, presenzeMinime:6};
+    DATA.meta        = DATA.meta        || {nomeTorneo:"Burraco Summer Tour"};
+    // criterio finalisti: "tappa" = si qualificano i primi di ogni serata,
+    // "generale" = una percentuale della classifica del circuito.
+    const imp = DATA.impostazioni;
+    if(!imp.criterio)               imp.criterio = "tappa";
+    if(imp.percentualeTappa == null) imp.percentualeTappa = 20;
+    if(imp.criterioConfermato == null) imp.criterioConfermato = false;
+  }
+}
+
+/* ============================================================
+   CALCOLO CLASSIFICHE
+   ============================================================ */
+function playersFromResults(){
+  const set = new Set((DATA.giocatori||[]).map(g=>resolveName(g.nome)));
+  DATA.risultati.forEach(r=>{ if(r.g1) set.add(resolveName(r.g1)); if(r.g2) set.add(resolveName(r.g2)); });
+  set.delete("");
+  return [...set].sort();
+}
+function classificaCoppie(){
+  const map = new Map();
+  DATA.risultati.forEach(r=>{
+    const a=resolveName(r.g1), b=resolveName(r.g2); if(!a||!b) return;
+    const k = coppiaKey(a,b);
+    if(!map.has(k)) map.set(k,{key:k,a,b,mp:0,vp:0,tappe:new Set()});
+    const o=map.get(k); o.mp+=Number(r.mp)||0; o.vp+=Number(r.vp)||0; o.tappe.add(r.tappaId);
+  });
+  return [...map.values()].map(o=>({...o,presenze:o.tappe.size}))
+    .sort((x,y)=> y.vp-x.vp || y.mp-x.mp || y.presenze-x.presenze);
+}
+function classificaSingoli(){
+  const map = new Map();
+  DATA.risultati.forEach(r=>{
+    [resolveName(r.g1),resolveName(r.g2)].forEach(n=>{
+      if(!n) return;
+      if(!map.has(n)) map.set(n,{nome:n,mp:0,vp:0,tappe:new Set()});
+      const o=map.get(n); o.mp+=Number(r.mp)||0; o.vp+=Number(r.vp)||0; o.tappe.add(r.tappaId);
+    });
+  });
+  return [...map.values()].map(o=>({...o,presenze:o.tappe.size}))
+    .sort((x,y)=> y.vp-x.vp || y.mp-x.mp || y.presenze-x.presenze);
+}
+function fedelta(){
+  const s = classificaSingoli();
+  return [...s].sort((x,y)=> y.presenze-x.presenze || y.vp-x.vp);
+}
+/* Due modi di decidere chi va in finale, perché i circuiti li usano entrambi:
+   · "tappa"    — si qualificano i primi di ogni singola serata (una percentuale
+                  delle coppie presenti quella sera); chi si qualifica resta dentro.
+   · "generale" — passa una percentuale della classifica del circuito, con un
+                  numero minimo di presenze.
+   Finché l'organizzatore non conferma il criterio, la scheda lo dichiara apertamente. */
+function finalistiCoppie(){
+  const c = classificaCoppie();
+  const imp = DATA.impostazioni;
+  if(imp.criterio === "tappa"){
+    const perc = Number(imp.percentualeTappa)||20;
+    const qualificate = new Set();
+    DATA.tappe.forEach(t=>{
+      const righe = DATA.risultati.filter(r=>r.tappaId===t.id)
+        .map(r=>({k:coppiaKey(resolveName(r.g1),resolveName(r.g2)), vp:Number(r.vp)||0, mp:Number(r.mp)||0}))
+        .sort((x,y)=> y.vp-x.vp || y.mp-x.mp);
+      if(!righe.length) return;
+      const quanti = Math.max(1, Math.round(righe.length*perc/100));
+      righe.slice(0,quanti).forEach(x=> qualificate.add(x.k));
+    });
+    const list = c.filter(x=>qualificate.has(x.key));
+    return {modo:"tappa", list, n:list.length, perc, totale:c.length, confermato:!!imp.criterioConfermato};
+  }
+  const min = Number(imp.presenzeMinime)||0;
+  const perc = Number(imp.finalistiPercentuale)||0;
+  const eligibili = c.filter(x=>x.presenze>=min);
+  const n = Math.max(1, Math.round(c.length*perc/100));
+  return {modo:"generale", list:eligibili.slice(0,n), n, min, perc, totale:c.length, confermato:!!imp.criterioConfermato};
+}
+function nTappe(){ return DATA.tappe.length; }
+function tappaById(id){ return DATA.tappe.find(t=>t.id===id); }
+function tappaLabel(t){ return "Tappa "+t.numero + (t.data?(" · "+t.data):"") + (t.luogo?(" · "+t.luogo):""); }
+
+/* ============================================================
+   PEZZI DI INTERFACCIA RIUTILIZZABILI
+   ============================================================ */
+function rankClass(i){ return i===0?"top1":i===1?"top2":i===2?"top3":""; }
+
+/* una riga di classifica: posizione · nomi · dati · punteggio */
+function boardRow(i,o){
+  return `<li class="brow ${rankClass(i)} ${ANIMATE?"enter":""}" style="--i:${Math.min(i,14)}">
+    <span class="pos">${i+1}</span>
+    <div class="who">
+      <p class="nm">${o.nome}</p>
+      ${o.nome2 ? `<p class="nm2">${o.nome2}${o.badge||""}</p>` : (o.badge ? `<p class="nm2">${o.badge}</p>` : "")}
+      ${o.meta ? `<p class="meta">${o.meta}</p>` : ""}
+      ${o.extra || ""}
+    </div>
+    <div class="score"><b>${o.score}</b><small>${o.scoreLabel}</small></div>
+  </li>`;
+}
+function metaMP(mp){ return `<span class="mp ${mp>=0?"up":"down"}">${fmtMP(mp)} MP</span>`; }
+function metaPresenze(n){ return `<span>${n} ${plural(n,"tappa","tappe")}</span>`; }
+function emptyState(titolo,testo,icona){
+  return `<div class="empty"><div class="big">${icona||"🔎"}</div><h2>${esc(titolo)}</h2><p>${esc(testo)}</p></div>`;
+}
+
+/* il podio: le prime tre servite come carte sul tavolo */
+const PIPS = ["♠","♥","♦"];
+function renderPodium(rows,label){
+  if(rows.length<3){ lastPodium=""; return ""; }
+  const firma = label+"|"+rows.slice(0,3).map(r=>r.k+"·"+r.s).join("|");
+  const servi = firma!==lastPodium;   // niente riservita a ogni ridisegno
+  lastPodium = firma;
+  return `<div class="podium">${rows.slice(0,3).map((r,i)=>`
+    <article class="pcard p${i+1}" style="--d:${i}; --rot:${[-5,4,-3][i]}deg;${servi?"":"animation:none"}">
+      <span class="index"><b>${i+1}</b><i>${PIPS[i]}</i></span>
+      <div class="pnames"><p>${esc(r.n1)}</p>${r.n2?`<p>${esc(r.n2)}</p>`:""}</div>
+      <div class="pscore"><b>${r.s}</b><small>${esc(label)}</small><span class="sep">${esc(r.side||"")}</span></div>
+      ${i===0?'<span class="shine"></span>':""}
+    </article>`).join("")}</div>`;
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  const q = normName($("#search").value);
+  if(DATA){
+    const nome = DATA.meta.nomeTorneo || "Burraco Summer Tour";
+    // la testata dice già "Burraco": nel titolo grande resta solo il nome del circuito
+    const corto = nome.replace(/\b(burraco|circuito)\b/ig,"")
+                      .replace(/\s+/g," ").replace(/^[\s\-–·]+|[\s\-–·]+$/g,"").trim() || nome;
+    $("#tourName").textContent = corto;
+    $("#miniName").textContent = corto;
+    updateStats();
+  }
+  $("#tappaSelect").style.display = (TAB==="tappe")?"":"none";
+  $("#clearBtn").hidden = !$("#search").value;
+
+  const v = $("#view");
+  if(!DATA){
+    $("#resultLine").textContent = "";
+    v.innerHTML = emptyState("Classifiche non raggiungibili",
+      "Controlla la connessione e tocca il pulsante di aggiornamento in alto a destra.","📡");
+    return;
+  }
+  if(TAB==="coppie")   return renderCoppie(v,q);
+  if(TAB==="singoli")  return renderSingoli(v,q);
+  if(TAB==="fedelta")  return renderFedelta(v,q);
+  if(TAB==="finalisti")return renderFinalisti(v,q);
+  if(TAB==="tappe")    return renderTappe(v,q);
+}
+
+function setResultLine(q,n,cosa){
+  const el = $("#resultLine");
+  const cercato = esc($("#search").value.trim());
+  if(!q){ el.innerHTML = `<b>${n}</b> ${cosa} in classifica`; return; }
+  el.innerHTML = n
+    ? `<b>${n}</b> ${plural(n,"risultato","risultati")} per «${cercato}»`
+    : `Nessun risultato per «${cercato}»`;
+}
+
+function renderCoppie(v,q){
+  const fin = finalistiCoppie();
+  const finKeys = new Set(fin.list.map(x=>x.key));
+  const tutte = classificaCoppie();
+  const rows = q ? tutte.filter(r=> normName(r.a).includes(q) || normName(r.b).includes(q)) : tutte;
+  setResultLine(q,rows.length,plural(rows.length,"coppia","coppie"));
+  if(!rows.length) return v.innerHTML = emptyState("Nessuna coppia con questo nome",
+    "Prova solo con il cognome, oppure controlla che sia scritto come sulla scheda della serata.");
+  const podio = q ? "" : renderPodium(tutte.map(r=>({k:r.key,s:r.vp,n1:r.a,n2:r.b,side:fmtMP(r.mp)+" MP"})),"VP");
+  v.innerHTML = podio + `
+    <div class="board-head"><h2>Classifica coppie</h2><span class="hint">VP → MP → presenze</span></div>
+    <ol class="board">${rows.map(r=>boardRow(tutte.indexOf(r),{
+      nome: hl(r.a,q),
+      nome2: hl(r.b,q),
+      badge: finKeys.has(r.key) ? '<span class="badge">Finale</span>' : "",
+      meta: metaPresenze(r.presenze)+metaMP(r.mp),
+      score: r.vp, scoreLabel:"VP"
+    })).join("")}</ol>
+    <p class="note">VP sono i punti di classifica della serata, MP la differenza punti. A parità di VP conta il MP più alto.</p>`;
+}
+
+function renderSingoli(v,q){
+  const tutti = classificaSingoli();
+  const rows = q ? tutti.filter(r=> normName(r.nome).includes(q)) : tutti;
+  setResultLine(q,rows.length,plural(rows.length,"giocatore","giocatori"));
+  if(!rows.length) return v.innerHTML = emptyState("Nessun giocatore con questo nome",
+    "Prova solo con il cognome, oppure controlla che sia scritto come sulla scheda della serata.");
+  const podio = q ? "" : renderPodium(tutti.map(r=>({k:r.nome,s:r.vp,n1:r.nome,n2:"",side:fmtMP(r.mp)+" MP"})),"VP");
+  v.innerHTML = podio + `
+    <div class="board-head"><h2>Classifica singoli</h2><span class="hint">i punti si sommano anche cambiando compagno</span></div>
+    <ol class="board">${rows.map(r=>boardRow(tutti.indexOf(r),{
+      nome: hl(r.nome,q),
+      meta: metaPresenze(r.presenze)+metaMP(r.mp),
+      score: r.vp, scoreLabel:"VP"
+    })).join("")}</ol>`;
+}
+
+function renderFedelta(v,q){
+  const tutti = fedelta();
+  const rows = q ? tutti.filter(r=> normName(r.nome).includes(q)) : tutti;
+  const tappe = [...DATA.tappe].sort((a,b)=>a.numero-b.numero);
+  setResultLine(q,rows.length,plural(rows.length,"giocatore","giocatori"));
+  if(!rows.length) return v.innerHTML = emptyState("Nessun giocatore con questo nome",
+    "Prova solo con il cognome, oppure controlla che sia scritto come sulla scheda della serata.");
+  v.innerHTML = `
+    <div class="board-head"><h2>Fedeltà al circuito</h2><span class="hint">tappe giocate su ${tappe.length}</span></div>
+    <ol class="board">${rows.map(r=>boardRow(tutti.indexOf(r),{
+      nome: hl(r.nome,q),
+      extra: `<div class="dots">${tappe.map(t=>`<span class="dot ${r.tappe.has(t.id)?"on":""}" title="Tappa ${t.numero}">${t.numero}</span>`).join("")}</div>`,
+      score: r.presenze, scoreLabel:"tappe"
+    })).join("")}</ol>`;
+}
+
+function renderFinalisti(v,q){
+  const fin = finalistiCoppie();
+  const rows = q ? fin.list.filter(r=> normName(r.a).includes(q) || normName(r.b).includes(q)) : fin.list;
+  setResultLine(q,rows.length,plural(rows.length,"coppia ammessa","coppie ammesse"));
+  const regola = fin.modo==="tappa"
+    ? `Si qualifica chi arriva nei <b>primi ${fin.perc}%</b> di una serata: finora
+       <b>${fin.n}</b> ${plural(fin.n,"coppia","coppie")} su <b>${fin.totale}</b>.
+       Una volta qualificati si resta dentro anche saltando le tappe successive.`
+    : `Passano le migliori <b>${fin.perc}%</b> coppie della classifica generale — oggi
+       <b>${fin.n}</b> ${plural(fin.n,"posto","posti")} su <b>${fin.totale}</b> — con almeno
+       <b>${fin.min}</b> ${plural(fin.min,"presenza","presenze")}.`;
+  const avviso = fin.confermato ? "" :
+    `<div class="daconfermare"><b>Criterio ancora da confermare.</b> Questa è una ricostruzione
+      fatta sui risultati delle prime tappe, non una regola comunicata dall'organizzatore:
+      finché non la conferma lui, l'elenco qui sotto va letto come indicativo.</div>`;
+  const testa = `<div class="panel">
+      <h2>Chi va in finale</h2>
+      <p>${regola} I criteri si cambiano nell'area organizzatore.</p>
+      ${avviso}
+    </div>`;
+  if(!rows.length) return v.innerHTML = testa + emptyState(
+      q ? "Nessuna coppia ammessa con questo nome" : "Ancora nessuna coppia ammessa",
+      q ? "Prova solo con il cognome."
+        : (fin.modo==="tappa" ? "Compariranno qui appena si gioca la prima tappa."
+                              : "Servono più tappe giocate perché qualcuno raggiunga le presenze minime."),"🏁");
+  v.innerHTML = testa + `
+    <div class="board-head"><h2>Coppie ammesse</h2><span class="hint">${rows.length} su ${fin.totale}</span></div>
+    <ol class="board">${rows.map(r=>boardRow(fin.list.indexOf(r),{
+      nome: hl(r.a,q), nome2: hl(r.b,q),
+      meta: metaPresenze(r.presenze)+metaMP(r.mp),
+      score: r.vp, scoreLabel:"VP"
+    })).join("")}</ol>`;
+}
+
+function renderTappe(v,q){
+  const sel = $("#tappaSelect");
+  const tappe = [...DATA.tappe].sort((a,b)=>b.numero-a.numero);
+  if(sel.dataset.n != tappe.length){
+    sel.innerHTML = tappe.map(t=>`<option value="${t.id}">${esc(tappaLabel(t))}</option>`).join("");
+    sel.dataset.n = tappe.length;
+  }
+  const tid = sel.value || (tappe[0]&&tappe[0].id);
+  if(!tid){
+    $("#resultLine").textContent = "";
+    return v.innerHTML = emptyState("Nessuna tappa inserita","Le serate compaiono qui appena l'organizzatore le carica.","🗓️");
+  }
+  const t = tappaById(tid);
+  const tutte = DATA.risultati.filter(r=>r.tappaId===tid)
+    .map(r=>({a:resolveName(r.g1),b:resolveName(r.g2),mp:Number(r.mp)||0,vp:Number(r.vp)||0}))
+    .sort((x,y)=> y.vp-x.vp || y.mp-x.mp);
+  const rows = q ? tutte.filter(r=> normName(r.a).includes(q)||normName(r.b).includes(q)) : tutte;
+  setResultLine(q,rows.length,plural(rows.length,"coppia","coppie"));
+  if(!rows.length) return v.innerHTML = emptyState("Nessuna coppia con questo nome in questa tappa",
+    "Cambia tappa dal menù qui sopra, oppure cerca solo il cognome.");
+  const podio = q ? "" : renderPodium(tutte.map(r=>({k:r.a+r.b,s:r.vp,n1:r.a,n2:r.b,side:fmtMP(r.mp)+" MP"})),"VP");
+  v.innerHTML = podio + `
+    <div class="board-head"><h2>Tappa ${t?t.numero:""}</h2>
+      <span class="hint">${t&&t.luogo?esc(t.luogo)+" · ":""}${tutte.length} ${plural(tutte.length,"coppia","coppie")}</span></div>
+    <ol class="board">${rows.map(r=>boardRow(tutte.indexOf(r),{
+      nome: hl(r.a,q), nome2: hl(r.b,q),
+      meta: metaMP(r.mp),
+      score: r.vp, scoreLabel:"VP"
+    })).join("")}</ol>`;
+}
+
+/* ============================================================
+   I NUMERI DEL TORNEO, IN TESTATA
+   ============================================================ */
+function updateStats(){
+  const vals = [nTappe(), classificaSingoli().length, classificaCoppie().length];
+  $$("#tourStats b").forEach((el,i)=>{
+    const to = vals[i]||0;
+    if(Number(el.dataset.count) === to) return;
+    el.dataset.count = to;
+    countUp(el,to);
+  });
+}
+function countUp(el,to){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent = to; return; }
+  const dur = 900, t0 = performance.now();
+  (function step(now){
+    const p = Math.min(1,(now-t0)/dur), e = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(to*e);
+    if(p<1) requestAnimationFrame(step);
+  })(t0);
+}
+
+/* ============================================================
+   GITHUB API
+   ============================================================ */
+function ghHeaders(){
+  return { "Authorization":"Bearer "+token.get(),
+    "Accept":"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28" };
+}
+async function ghGet(path){
+  const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}?ts=${Date.now()}`,
+    {headers: ghHeaders(), cache:"no-store"});
+  if(r.status===404) return null;
+  if(!r.ok) throw new Error("GitHub GET "+r.status+": "+(await r.text()));
+  return await r.json();
+}
+/* Verifica SERIA della chiave: la chiede a GitHub.
+   Non passa da loadData(), che ha un fallback sul file statico e quindi
+   riuscirebbe anche con una chiave falsa. Qui pretendiamo che GitHub
+   riconosca la chiave E che dia il permesso di scrittura. */
+async function verificaChiave(){
+  if(!token.get()) throw new Error("nessuna chiave inserita");
+  let r;
+  try{
+    r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}?ts=${Date.now()}`,
+      {headers: ghHeaders(), cache:"no-store"});
+  }catch(e){
+    throw new Error("non riesco a contattare GitHub — controlla la connessione");
+  }
+  if(r.status===401) throw new Error("chiave non riconosciuta da GitHub (controlla di averla copiata tutta)");
+  if(r.status===403) throw new Error("chiave bloccata o senza permessi su questo progetto");
+  if(r.status===404) throw new Error("questa chiave non ha accesso al progetto "+REPO);
+  if(!r.ok) throw new Error("GitHub ha risposto "+r.status);
+  const repo = await r.json();
+  // Senza chiave valida GitHub non manda affatto "permissions" (il repo è pubblico):
+  // se manca, vuol dire che la richiesta è passata come anonima.
+  if(!repo.permissions) throw new Error("chiave ignorata da GitHub: risulta un accesso anonimo");
+  if(!repo.permissions.push) throw new Error("questa chiave può solo leggere. Serve il permesso Contents: Read and write");
+  return true;
+}
+async function ghPut(path, contentStr, sha, message){
+  const body = { message, content: b64encode(contentStr) };
+  if(sha) body.sha = sha;
+  const r = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/contents/${path}`,
+    {method:"PUT", headers:{...ghHeaders(),"Content-Type":"application/json"}, body:JSON.stringify(body)});
+  if(!r.ok) throw new Error("GitHub PUT "+r.status+": "+(await r.text()));
+  return await r.json();
+}
+function b64encode(str){ return btoa(unescape(encodeURIComponent(str))); }
+function b64decode(b64){ return decodeURIComponent(escape(atob(b64.replace(/\s/g,"")))); }
+
+async function saveData(message){
+  if(!token.get()) throw new Error("Token organizzatore mancante.");
+  // rileggo sempre lo sha aggiornato per non sovrascrivere modifiche altrui
+  const cur = await ghGet(DATA_PATH);
+  SHA = cur ? cur.sha : null;
+  DATA.meta.aggiornatoAllaTappa = nTappe();
+  DATA.meta.updatedAt = new Date().toISOString();
+  const res = await ghPut(DATA_PATH, JSON.stringify(DATA,null,2), SHA, message||"Aggiornamento classifiche (via app)");
+  SHA = res.content.sha;
+  return res;
+}
+
+/* ============================================================
+   ADMIN UI
+   ============================================================ */
+function renderAdmin(){
+  const body = $("#adminBody");
+  const connected = !!token.get();
+  $("#adminState").textContent = connected ? "connesso ✓" : "non connesso";
+  if(!connected){
+    body.innerHTML = `
+      <p class="hint">Per <b>modificare</b> i dati serve la chiave organizzatore (token GitHub).
+      La chiave resta salvata <b>solo su questo dispositivo</b>. Chi guarda le classifiche non ne ha bisogno.</p>
+      <div class="field"><label>Chiave organizzatore (token GitHub)</label>
+        <input id="tokenInput" type="password" placeholder="github_pat_… oppure ghp_…" autocomplete="off"></div>
+      <button class="btn primary" id="loginBtn">Connetti</button>
+      <div class="status info show" style="margin-top:12px">
+        Non ce l'hai? Guida rapida per crearla: apri <span class="kbd">github.com/settings/personal-access-tokens</span>,
+        crea un <i>Fine-grained token</i> con accesso al repository <b>${REPO}</b> e permesso
+        <b>Contents: Read and write</b>, poi incollala qui.</div>
+      <div id="adminStatus" class="status"></div>`;
+    $("#loginBtn").onclick = async ()=>{
+      const t = $("#tokenInput").value.trim(); if(!t) return;
+      const btn = $("#loginBtn");
+      btn.disabled = true;
+      token.set(t);
+      setStatus("Verifico la chiave con GitHub…","info");
+      try{
+        await verificaChiave();          // <- il vero controllo: se fallisce, si esce di qui
+        await loadData();
+        setStatus("Chiave valida ✓ Ora puoi modificare e salvare.","ok");
+        lastPodium="";
+        renderAdmin(); render();
+      }catch(e){
+        token.set("");                   // chiave rifiutata: non la teniamo
+        setStatus("Chiave rifiutata: "+e.message,"err");
+        btn.disabled = false;
+      }
+    };
+    return;
+  }
+  // connesso
+  const players = playersFromResults();
+  body.innerHTML = `
+    <div class="row">
+      <button class="btn" id="logoutBtn">Disconnetti</button>
+      <button class="btn" id="exportJson">⬇︎ Backup JSON</button>
+      <button class="btn" id="exportCsv">⬇︎ Esporta classifiche (CSV)</button>
+    </div>
+
+    <div class="section">
+      <h3>➕ Nuova tappa</h3>
+      <p class="hint">Crea la serata, poi inserisci sotto i risultati delle coppie.</p>
+      <div class="row">
+        <div class="field"><label>Numero</label><input id="ntNum" type="number" value="${nTappe()+1}"></div>
+        <div class="field"><label>Data</label><input id="ntData" type="date" value="${todayISO()}"></div>
+        <div class="field"><label>Luogo (facoltativo)</label><input id="ntLuogo" placeholder="es. Circolo…"></div>
+      </div>
+      <button class="btn primary" id="addTappaBtn">Crea tappa</button>
+    </div>
+
+    <div class="section">
+      <h3>📝 Inserisci risultati</h3>
+      <div class="field"><label>Tappa</label>
+        <select id="riTappa">${[...DATA.tappe].sort((a,b)=>b.numero-a.numero).map(t=>`<option value="${t.id}">${esc(tappaLabel(t))}</option>`).join("")||'<option value="">— crea prima una tappa —</option>'}</select></div>
+      <datalist id="playerList">${players.map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
+      <div class="row">
+        <div class="field"><label>Giocatore 1</label><input id="riG1" list="playerList" placeholder="Cognome Nome"></div>
+        <div class="field"><label>Giocatore 2</label><input id="riG2" list="playerList" placeholder="Cognome Nome"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>MP (differenza punti)</label>
+          <div class="mprow">
+            <input id="riMP" type="text" inputmode="numeric" autocomplete="off" placeholder="es. 1485">
+            <button class="btn signbtn" id="riSegno" type="button" title="Cambia il segno: positivo o negativo" aria-label="Cambia il segno degli MP">＋</button>
+          </div>
+        </div>
+        <div class="field"><label>VP (punti classifica)</label><input id="riVP" type="text" inputmode="numeric" autocomplete="off" placeholder="es. 47"></div>
+      </div>
+      <button class="btn" id="addRowBtn">Aggiungi coppia all'elenco</button>
+      <div class="rowlist" id="editRows"></div>
+      <button class="btn primary" id="saveRowsBtn" style="margin-top:12px">💾 Salva risultati su GitHub</button>
+    </div>
+
+    <div class="section">
+      <h3>🗂 Correggi o cancella un risultato già salvato</h3>
+      <p class="hint">Se una sera un punteggio finisce storto, si sistema da qui. Anche una correzione
+        lascia la sua traccia su GitHub: la versione di prima resta sempre recuperabile.</p>
+      <div class="field"><label>Tappa</label>
+        <select id="edTappa">${[...DATA.tappe].sort((a,b)=>b.numero-a.numero).map(t=>`<option value="${t.id}">${esc(tappaLabel(t))}</option>`).join("")||'<option value="">— nessuna tappa —</option>'}</select></div>
+      <div class="rowlist" id="savedRows"></div>
+    </div>
+
+    <div class="section">
+      <h3>👥 Giocatori — unisci duplicati</h3>
+      <p class="hint">Es. "BALISTIERI GIUSEPPE" e "BALISTRIERI GIUSEPPE" sono la stessa persona: uniscili.</p>
+      <div class="row">
+        <div class="field"><label>Nome sbagliato / doppione</label><input id="mgFrom" list="playerList" placeholder="nome da unire"></div>
+        <div class="field"><label>Nome corretto</label><input id="mgTo" list="playerList" placeholder="nome corretto"></div>
+      </div>
+      <button class="btn" id="mergeBtn">Unisci (e salva)</button>
+    </div>
+
+    <div class="section">
+      <h3>⚙️ Criteri finalisti</h3>
+      <p class="hint">Come si decide chi va in finale. Cambiando questa impostazione cambia
+        subito la scheda «Finalisti».</p>
+      <div class="field"><label>Criterio</label>
+        <select id="setCriterio">
+          <option value="tappa"${DATA.impostazioni.criterio==="tappa"?" selected":""}>Si qualificano i primi di ogni tappa</option>
+          <option value="generale"${DATA.impostazioni.criterio==="generale"?" selected":""}>Passa una percentuale della classifica generale</option>
+        </select></div>
+      <div class="row">
+        <div class="field"><label>% dei primi di ogni tappa</label><input id="setPercTappa" type="text" inputmode="numeric" value="${DATA.impostazioni.percentualeTappa}"></div>
+        <div class="field"><label>% sulla generale</label><input id="setPerc" type="text" inputmode="numeric" value="${DATA.impostazioni.finalistiPercentuale}"></div>
+        <div class="field"><label>Presenze minime (generale)</label><input id="setMin" type="text" inputmode="numeric" value="${DATA.impostazioni.presenzeMinime}"></div>
+      </div>
+      <label class="ri" style="border:0;padding:6px 0;gap:10px;cursor:pointer">
+        <input type="checkbox" id="setConf" style="width:20px;height:20px;flex:0 0 auto"${DATA.impostazioni.criterioConfermato?" checked":""}>
+        <span>Criterio confermato dall'organizzatore <span class="muted">— toglie l'avviso «da confermare» dalla scheda Finalisti</span></span>
+      </label>
+      <div class="field"><label>Nome torneo</label><input id="setNome" value="${esc(DATA.meta.nomeTorneo||'')}"></div>
+      <button class="btn" id="saveSetBtn">Salva impostazioni</button>
+    </div>
+
+    <div id="adminStatus" class="status"></div>`;
+
+  $("#logoutBtn").onclick = ()=>{ token.set(""); renderAdmin(); aggiornaAccessoAdmin(); };
+  $("#exportJson").onclick = exportJson;
+  $("#exportCsv").onclick = exportCsv;
+  $("#addTappaBtn").onclick = addTappa;
+  $("#addRowBtn").onclick = addEditRow;
+  $("#saveRowsBtn").onclick = saveRows;
+  $("#mergeBtn").onclick = mergePlayers;
+  $("#saveSetBtn").onclick = saveSettings;
+  $("#riSegno").onclick = toggleSegno;
+  $("#riMP").addEventListener("input", aggiornaSegno);
+  $("#edTappa").onchange = ()=>{ pendingDel=-1; drawSavedRows(); };
+  drawEditRows();
+  drawSavedRows();
+  aggiornaSegno();
+  if(editRows.length) setStatus(editRows.length+" "+plural(editRows.length,"coppia rimasta","coppie rimaste")+" in coda dalla volta scorsa: sono ancora da salvare.","info");
+}
+
+/* Il meno non c'è sulla tastiera numerica del telefono: si mette con questo tasto. */
+function toggleSegno(){
+  const el = $("#riMP"); if(!el) return;
+  el.value = /^\s*-/.test(el.value) ? el.value.replace(/^\s*-/,"") : "-"+el.value;
+  aggiornaSegno(); el.focus();
+}
+function aggiornaSegno(){
+  const el = $("#riMP"), b = $("#riSegno"); if(!el||!b) return;
+  const neg = /^\s*-/.test(el.value);
+  b.classList.toggle("neg", neg);
+  b.textContent = neg ? "−" : "＋";
+}
+function setStatus(msg,type){
+  const el = $("#adminStatus"); if(!el) return;
+  el.className = "status show "+(type||"info"); el.textContent = msg;
+}
+
+function addTappa(){
+  const num = parseInt($("#ntNum").value)||nTappe()+1;
+  const id = "t"+Date.now();
+  DATA.tappe.push({id, numero:num, data:$("#ntData").value||null, luogo:$("#ntLuogo").value.trim()||null});
+  saveData("Creata tappa "+num)
+    .then(()=>{ lastPodium=""; renderAdmin(); render(); setStatus("Tappa "+num+" creata e salvata.","ok"); })
+    .catch(e=>{ DATA.tappe.pop(); setStatus("Errore salvataggio: "+e.message,"err"); });
+}
+function addEditRow(){
+  const g1=$("#riG1").value.trim(), g2=$("#riG2").value.trim();
+  const mp=parseNum($("#riMP").value), vp=parseNum($("#riVP").value);
+  if(!g1||!g2) return setStatus("Inserisci entrambi i giocatori.","err");
+  if(isNaN(mp)||isNaN(vp)) return setStatus("Inserisci MP e VP (numeri).","err");
+  const tappaId = $("#riTappa").value;
+  const avviso = controllaDoppione(tappaId, g1, g2);
+  if(avviso){
+    const firma = tappaId+"|"+coppiaKey(g1,g2);
+    if(confermaDup !== firma){
+      confermaDup = firma;
+      return setStatus(avviso+" Se è giusto così, premi di nuovo «Aggiungi coppia».","err");
+    }
+  }
+  confermaDup = "";
+  editRows.push({tappaId, g1:normName(g1), g2:normName(g2), mp, vp});
+  $("#riG1").value=$("#riG2").value=$("#riMP").value=$("#riVP").value="";
+  $("#riG1").focus(); aggiornaSegno(); drawEditRows(); setStatus("","info");
+}
+/* Due errori che in serata capitano davvero: salvare due volte la stessa coppia,
+   e iscrivere una persona a due tavoli della stessa sera. Meglio chiedere. */
+function controllaDoppione(tappaId, g1, g2){
+  const k = coppiaKey(g1,g2);
+  const inCoda    = editRows.some(r=> r.tappaId===tappaId && coppiaKey(r.g1,r.g2)===k);
+  const giaSalvata= DATA.risultati.some(r=> r.tappaId===tappaId && coppiaKey(r.g1,r.g2)===k);
+  if(giaSalvata) return "Questa coppia è già salvata in questa tappa.";
+  if(inCoda)     return "Questa coppia è già in coda per questa tappa.";
+  const nomi = [normName(g1), normName(g2)];
+  const presenti = new Set();
+  DATA.risultati.filter(r=>r.tappaId===tappaId).forEach(r=>{ presenti.add(normName(r.g1)); presenti.add(normName(r.g2)); });
+  editRows.filter(r=>r.tappaId===tappaId).forEach(r=>{ presenti.add(normName(r.g1)); presenti.add(normName(r.g2)); });
+  const doppio = nomi.filter(n=> presenti.has(n));
+  if(doppio.length) return doppio.join(" e ")+" "+plural(doppio.length,"risulta già","risultano già")+" in questa tappa con un altro compagno.";
+  return "";
+}
+function drawEditRows(){
+  saveQueue();
+  const box=$("#editRows"); if(!box) return;
+  if(!editRows.length){ box.innerHTML='<div class="ri muted">Nessuna coppia in coda. Aggiungine sopra.</div>'; return; }
+  box.innerHTML = editRows.map((r,i)=>`<div class="ri">
+    <span class="nomi">${esc(r.g1)} / ${esc(r.g2)}</span>
+    <span class="tag">MP ${fmtMP(r.mp)}</span><span class="tag">VP ${r.vp}</span>
+    <span class="x" data-i="${i}">✕</span></div>`).join("");
+  $$(".x",box).forEach(x=> x.onclick=()=>{ editRows.splice(+x.dataset.i,1); drawEditRows(); });
+}
+
+/* ============================================================
+   CORREGGERE O CANCELLARE UN RISULTATO GIÀ SALVATO
+   ============================================================ */
+function drawSavedRows(){
+  const box=$("#savedRows"); if(!box) return;
+  const sel=$("#edTappa"); const tid = sel ? sel.value : "";
+  const righe = DATA.risultati.map((r,i)=>({r,i})).filter(o=>o.r.tappaId===tid)
+    .sort((a,b)=> (Number(b.r.vp)||0)-(Number(a.r.vp)||0) || (Number(b.r.mp)||0)-(Number(a.r.mp)||0));
+  if(!righe.length){ box.innerHTML='<div class="ri muted">Nessun risultato salvato in questa tappa.</div>'; return; }
+  box.innerHTML = righe.map(o=>`<div class="ri" data-i="${o.i}">
+    <span class="nomi">${esc(o.r.g1)} / ${esc(o.r.g2)}</span>
+    <span class="tag">MP ${fmtMP(o.r.mp)}</span><span class="tag">VP ${o.r.vp}</span>
+    <span class="e" data-e="${o.i}" title="Correggi">✎</span>
+    ${o.i===pendingDel
+      ? `<span class="x conf" data-x="${o.i}">Cancello?</span>`
+      : `<span class="x" data-x="${o.i}" title="Cancella">✕</span>`}
+  </div>`).join("");
+  $$(".e",box).forEach(b=> b.onclick=()=> editSaved(+b.dataset.e));
+  $$(".x",box).forEach(b=> b.onclick=()=> deleteSaved(+b.dataset.x));
+}
+function editSaved(i){
+  pendingDel = -1;
+  const r = DATA.risultati[i]; if(!r) return;
+  const el = $(`#savedRows .ri[data-i="${i}"]`); if(!el) return;
+  el.classList.add("editing");
+  el.innerHTML = `<span class="nomi">${esc(r.g1)} / ${esc(r.g2)}</span>
+    <input class="inp" id="edMP" value="${Number(r.mp)||0}" inputmode="numeric" aria-label="MP">
+    <input class="inp" id="edVP" value="${Number(r.vp)||0}" inputmode="numeric" aria-label="VP">
+    <button class="btn mini primary" id="edOk">Salva</button>
+    <button class="btn mini" id="edNo">Annulla</button>`;
+  $("#edNo").onclick = ()=> drawSavedRows();
+  $("#edOk").onclick = async ()=>{
+    const mp=parseNum($("#edMP").value), vp=parseNum($("#edVP").value);
+    if(isNaN(mp)||isNaN(vp)) return setStatus("MP e VP devono essere numeri.","err");
+    const prima = {mp:r.mp, vp:r.vp};
+    if(prima.mp===mp && prima.vp===vp) return drawSavedRows();
+    r.mp=mp; r.vp=vp;
+    setStatus("Salvataggio della correzione…","info");
+    try{
+      await saveData(`Corretto ${r.g1} / ${r.g2}: MP ${prima.mp}→${mp}, VP ${prima.vp}→${vp}`);
+      setStatus("Risultato corretto. La versione di prima resta su GitHub.","ok");
+      lastPodium=""; render(); drawSavedRows();
+    }catch(e){
+      r.mp=prima.mp; r.vp=prima.vp;
+      setStatus("Errore: "+e.message,"err"); drawSavedRows();
+    }
+  };
+}
+function deleteSaved(i){
+  if(pendingDel !== i){ pendingDel = i; drawSavedRows(); return; }  // primo clic: chiede conferma
+  pendingDel = -1;
+  const r = DATA.risultati[i]; if(!r) return drawSavedRows();
+  const backup = DATA.risultati.slice(), etichetta = r.g1+" / "+r.g2;
+  DATA.risultati.splice(i,1);
+  setStatus("Cancellazione in corso…","info");
+  saveData("Cancellato risultato "+etichetta)
+    .then(()=>{ setStatus("Risultato cancellato. Resta nella cronologia di GitHub.","ok"); lastPodium=""; render(); drawSavedRows(); })
+    .catch(e=>{ DATA.risultati = backup; setStatus("Errore: "+e.message,"err"); drawSavedRows(); });
+}
+async function saveRows(){
+  if(!editRows.length) return setStatus("Nessuna coppia da salvare.","err");
+  const backup = DATA.risultati.slice();
+  editRows.forEach(r=> DATA.risultati.push({...r}));
+  setStatus("Salvataggio in corso…","info");
+  try{
+    const tId = editRows[0].tappaId, t=tappaById(tId);
+    const quante = editRows.length;
+    await saveData("Inseriti "+editRows.length+" risultati"+(t?(" tappa "+t.numero):""));
+    editRows=[]; lastPodium=""; render();
+    renderAdmin();   // prima si ridisegna il pannello, poi si scrive il messaggio:
+                     // al contrario il pannello nuovo cancellerebbe la conferma appena data
+    setStatus(quante+" "+plural(quante,"risultato salvato","risultati salvati")+"! Copia di sicurezza creata su GitHub.","ok");
+  }catch(e){ DATA.risultati=backup; setStatus("Errore: "+e.message,"err"); }
+}
+async function mergePlayers(){
+  const from=normName($("#mgFrom").value), to=normName($("#mgTo").value);
+  if(!from||!to||from===to) return setStatus("Inserisci due nomi diversi.","err");
+  DATA.aliases[from]=to;
+  try{
+    await saveData("Unito giocatore "+from+" → "+to);
+    lastPodium=""; render(); renderAdmin();
+    setStatus("«"+from+"» ora conta come «"+to+"». Unione salvata.","ok");
+  }catch(e){ delete DATA.aliases[from]; setStatus("Errore: "+e.message,"err"); }
+}
+async function saveSettings(){
+  const imp = DATA.impostazioni, prima = {...imp}, nomePrima = DATA.meta.nomeTorneo;
+  imp.criterio            = $("#setCriterio").value==="generale" ? "generale" : "tappa";
+  imp.percentualeTappa    = parseNum($("#setPercTappa").value)||20;
+  imp.finalistiPercentuale= parseNum($("#setPerc").value)||15;
+  imp.presenzeMinime      = parseNum($("#setMin").value)||0;
+  imp.criterioConfermato  = $("#setConf").checked;
+  DATA.meta.nomeTorneo    = $("#setNome").value.trim()||DATA.meta.nomeTorneo;
+  try{ await saveData("Aggiornate impostazioni"); setStatus("Impostazioni salvate.","ok"); lastPodium=""; render(); }
+  catch(e){ DATA.impostazioni = prima; DATA.meta.nomeTorneo = nomePrima; setStatus("Errore: "+e.message,"err"); }
+}
+
+/* ============================================================
+   EXPORT / BACKUP
+   ============================================================ */
+function download(name, text, type){
+  const blob=new Blob([text],{type:type||"text/plain;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function exportJson(){ download("burraco-backup-"+todayISO()+".json", JSON.stringify(DATA,null,2), "application/json"); }
+function exportCsv(){
+  const c=classificaCoppie(), s=classificaSingoli();
+  let out="CLASSIFICA COPPIE\nPos;Giocatore 1;Giocatore 2;Presenze;MP;VP\n";
+  c.forEach((r,i)=> out+=`${i+1};${r.a};${r.b};${r.presenze};${r.mp};${r.vp}\n`);
+  out+="\nCLASSIFICA SINGOLI\nPos;Giocatore;Presenze;MP;VP\n";
+  s.forEach((r,i)=> out+=`${i+1};${r.nome};${r.presenze};${r.mp};${r.vp}\n`);
+  download("burraco-classifiche-"+todayISO()+".csv", "﻿"+out, "text/csv;charset=utf-8");
+}
+
+/* ============================================================
+   MOVIMENTO: l'indicatore delle sezioni, la testata che si aggancia
+   ============================================================ */
+function moveInk(){
+  const b = $("#tabs .tab.active"), ink = $("#ink");
+  if(!b || !ink) return;
+  ink.style.width = b.offsetWidth+"px";
+  ink.style.transform = "translateX("+b.offsetLeft+"px)";
+}
+function watchScroll(){
+  const onScroll = ()=> document.body.classList.toggle("scrolled", window.scrollY > 90);
+  addEventListener("scroll", onScroll, {passive:true});
+  onScroll();
+}
+
+/* ============================================================
+   AVVIO
+   ============================================================ */
+function bindUI(){
+  $$("#tabs .tab").forEach(b=> b.onclick=()=>{
+    if(TAB===b.dataset.tab) return;
+    TAB=b.dataset.tab; ANIMATE=true; lastPodium="";
+    $$("#tabs .tab").forEach(x=>x.classList.toggle("active",x===b));
+    moveInk();
+    b.scrollIntoView({block:"nearest", inline:"center", behavior:"smooth"});
+    render();
+  });
+  $("#search").addEventListener("input", ()=>{ ANIMATE=false; render(); });
+  $("#clearBtn").onclick = ()=>{ $("#search").value=""; ANIMATE=true; lastPodium=""; render(); $("#search").focus(); };
+  $("#tappaSelect").addEventListener("change", ()=>{ ANIMATE=true; lastPodium=""; render(); });
+  $("#refreshBtn").onclick = async (e)=>{
+    const btn = e.currentTarget; btn.classList.add("spin");
+    SHA=null; DATA=null; await loadData();
+    ANIMATE=true; lastPodium=""; render(); btn.classList.remove("spin");
+  };
+  $("#adminBox").addEventListener("toggle", e=>{ if(e.target.open) renderAdmin(); });
+  addEventListener("hashchange", aggiornaAccessoAdmin);
+  addEventListener("resize", moveInk);
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(moveInk);
+}
+
+/* ============================================================
+   ACCESSO ORGANIZZATORE
+   L'area è visibile solo a chi apre il link segreto (#ADMIN_HASH)
+   oppure a chi ha già la chiave salvata su questo dispositivo —
+   così Salvo, dopo la prima volta, la ritrova anche col link normale.
+   ============================================================ */
+function aggiornaAccessoAdmin(){
+  const chiesta = location.hash.replace(/^#/,"").trim().toLowerCase();
+  const sbloccata = (chiesta === ADMIN_HASH.toLowerCase()) || !!token.get();
+  const barra = $(".admin-bar");
+  barra.classList.toggle("sbloccata", sbloccata);
+  if(!sbloccata){ $("#adminBox").open = false; return; }
+  if(chiesta === ADMIN_HASH.toLowerCase()){ $("#adminBox").open = true; }
+  renderAdmin();
+}
+(async function(){
+  editRows = loadQueue();   // quello che era rimasto in coda l'ultima volta
+  bindUI();
+  watchScroll();
+  moveInk();
+  // Se c'è una chiave salvata la ricontrollo subito: se non è più buona
+  // (scaduta, revocata, o robaccia rimasta da una prova) la butto via adesso,
+  // così non si scopre a fine serata dopo aver inserito tutti i risultati.
+  if(token.get()){
+    try{ await verificaChiave(); }
+    catch(e){ token.set(""); }
+  }
+  await loadData();
+  render();
+  moveInk();
+  aggiornaAccessoAdmin();
+  $("#footNote").innerHTML = "Progetto: <span class='kbd'>"+OWNER+"/"+REPO+"</span>";
+})();
+</script>
+</body>
+</html>
