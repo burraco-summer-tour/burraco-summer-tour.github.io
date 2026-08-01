@@ -427,6 +427,43 @@ details.admin[open]>summary{border-bottom:1px solid var(--line-soft)}
   background:rgba(214,166,62,.14); border:1px solid var(--brass); color:var(--ink);
 }
 
+/* ---------- dashboard di serata & autocompilazione ---------- */
+.dash{display:flex; gap:10px; margin:6px 0 2px}
+.dstat{
+  flex:1; min-width:0; background:var(--card-2); border:1px solid var(--line-soft);
+  border-radius:var(--r-md); padding:10px 8px; text-align:center;
+}
+.dstat b{
+  display:block; font-family:"Fraunces",Georgia,serif; font-size:24px; line-height:1.1;
+  color:var(--brass); font-variant-numeric:tabular-nums;
+}
+.dstat small{font-size:11px; font-weight:600; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft)}
+.startbtn{width:100%; padding:14px; font-size:16px}
+/* la tendina dei nomi: si apre sotto al campo mentre si scrive */
+.field.ac{position:relative}
+.aclist{
+  position:absolute; z-index:40; left:0; right:0; top:100%; margin-top:4px;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--r-sm);
+  box-shadow:var(--shadow-lift); max-height:224px; overflow:auto;
+}
+.aclist[hidden]{display:none}
+.aclist .ai{padding:11px 13px; font-size:15px; cursor:pointer; border-bottom:1px solid var(--line-soft)}
+.aclist .ai:last-child{border-bottom:0}
+.aclist .ai.sel,.aclist .ai:hover{background:var(--card-2)}
+/* la riga sotto al campo: nome nuovo, refuso probabile, compagno abituale */
+.acnote{
+  margin-top:7px; font-size:13.5px; color:var(--ink-soft); line-height:1.45;
+  display:flex; flex-wrap:wrap; align-items:center; gap:6px;
+}
+.acnote:empty{display:none}
+.chip{
+  border:1px solid var(--brass); background:rgba(214,166,62,.12); color:var(--ink);
+  border-radius:999px; padding:4px 11px; font:inherit; font-size:13.5px; font-weight:600;
+  cursor:pointer; transition:background .2s, color .2s;
+}
+.chip:hover{background:var(--brass); color:#fff}
+.tagnew{color:var(--verdant); font-weight:700}
+
 .footer{
   width:var(--wrap); margin:34px auto 0; padding-top:20px; border-top:1px solid var(--line);
   color:var(--ink-soft); font-size:13px; text-align:center; line-height:1.7;
@@ -1020,6 +1057,8 @@ function renderAdmin(){
   }
   // connesso
   const players = playersFromResults();
+  const tOggi = DATA.tappe.find(t=>t.data===todayISO());
+  const ultima = [...DATA.tappe].sort((a,b)=>(Number(b.numero)||0)-(Number(a.numero)||0))[0];
   body.innerHTML = `
     <div class="row">
       <button class="btn" id="logoutBtn">Disconnetti</button>
@@ -1027,25 +1066,27 @@ function renderAdmin(){
       <button class="btn" id="exportCsv">⬇︎ Esporta classifiche (CSV)</button>
     </div>
 
-    <div class="section">
-      <h3>➕ Nuova tappa</h3>
-      <p class="hint">Crea la serata, poi inserisci sotto i risultati delle coppie.</p>
-      <div class="row">
-        <div class="field"><label>Numero</label><input id="ntNum" type="number" value="${nTappe()+1}"></div>
-        <div class="field"><label>Data</label><input id="ntData" type="date" value="${todayISO()}"></div>
-        <div class="field"><label>Luogo (facoltativo)</label><input id="ntLuogo" placeholder="es. Circolo…"></div>
-      </div>
-      <button class="btn primary" id="addTappaBtn">Crea tappa</button>
+    <div class="dash">
+      <div class="dstat"><b>${nTappe()}</b><small>${plural(nTappe(),"tappa","tappe")}</small></div>
+      <div class="dstat"><b>${players.length}</b><small>giocatori</small></div>
+      <div class="dstat"><b id="dashCoppie">0</b><small>coppie inserite</small></div>
     </div>
+    ${tOggi ? `
+    <p class="hint" style="margin-top:10px">Stasera si gioca la <b>Tappa ${tOggi.numero}</b>${tOggi.luogo?` · ${esc(tOggi.luogo)}`:""}: inserisci le coppie qui sotto.</p>` : `
+    <div class="section" style="border:0;margin-top:10px;padding-top:0">
+      <div class="field"><label>Dove si gioca stasera (facoltativo)</label>
+        <input id="startLuogo" value="${esc((ultima&&ultima.luogo)||"")}" placeholder="es. Circolo…"></div>
+      <button class="btn primary startbtn" id="startBtn">▶ Inizia la serata — crea la Tappa ${prossimoNumero()}</button>
+    </div>`}
 
     <div class="section">
       <h3>📝 Inserisci risultati</h3>
+      <p class="hint">Scrivi le prime lettere di un nome: chi ha già giocato si completa da solo.</p>
       <div class="field"><label>Tappa</label>
         <select id="riTappa">${[...DATA.tappe].sort((a,b)=>b.numero-a.numero).map(t=>`<option value="${t.id}">${esc(tappaLabel(t))}</option>`).join("")||'<option value="">— crea prima una tappa —</option>'}</select></div>
-      <datalist id="playerList">${players.map(p=>`<option value="${esc(p)}">`).join("")}</datalist>
       <div class="row">
-        <div class="field"><label>Giocatore 1</label><input id="riG1" list="playerList" placeholder="Cognome Nome"></div>
-        <div class="field"><label>Giocatore 2</label><input id="riG2" list="playerList" placeholder="Cognome Nome"></div>
+        <div class="field"><label>Giocatore 1</label><input id="riG1" placeholder="Cognome Nome" autocomplete="off"><div class="acnote"></div></div>
+        <div class="field"><label>Giocatore 2</label><input id="riG2" placeholder="Cognome Nome" autocomplete="off"><div class="acnote" id="riG2note"></div></div>
       </div>
       <div class="row">
         <div class="field"><label>MP (differenza punti)</label>
@@ -1071,11 +1112,23 @@ function renderAdmin(){
     </div>
 
     <div class="section">
+      <h3>➕ Nuova tappa (a mano)</h3>
+      <p class="hint">Per stasera basta il pulsante «Inizia la serata» qui sopra: questa serve
+        per caricare serate passate o casi particolari.</p>
+      <div class="row">
+        <div class="field"><label>Numero</label><input id="ntNum" type="number" value="${prossimoNumero()}"></div>
+        <div class="field"><label>Data</label><input id="ntData" type="date" value="${todayISO()}"></div>
+        <div class="field"><label>Luogo (facoltativo)</label><input id="ntLuogo" placeholder="es. Circolo…"></div>
+      </div>
+      <button class="btn primary" id="addTappaBtn">Crea tappa</button>
+    </div>
+
+    <div class="section">
       <h3>👥 Giocatori — unisci duplicati</h3>
       <p class="hint">Es. "BALISTIERI GIUSEPPE" e "BALISTRIERI GIUSEPPE" sono la stessa persona: uniscili.</p>
       <div class="row">
-        <div class="field"><label>Nome sbagliato / doppione</label><input id="mgFrom" list="playerList" placeholder="nome da unire"></div>
-        <div class="field"><label>Nome corretto</label><input id="mgTo" list="playerList" placeholder="nome corretto"></div>
+        <div class="field"><label>Nome sbagliato / doppione</label><input id="mgFrom" placeholder="nome da unire" autocomplete="off"></div>
+        <div class="field"><label>Nome corretto</label><input id="mgTo" placeholder="nome corretto" autocomplete="off"></div>
       </div>
       <button class="btn" id="mergeBtn">Unisci (e salva)</button>
     </div>
@@ -1115,9 +1168,21 @@ function renderAdmin(){
   $("#riSegno").onclick = toggleSegno;
   $("#riMP").addEventListener("input", aggiornaSegno);
   $("#edTappa").onchange = ()=>{ pendingDel=-1; drawSavedRows(); };
+  if($("#startBtn")) $("#startBtn").onclick = avviaSerata;
+  if(tOggi) $("#riTappa").value = tOggi.id;
+  // autocompilazione: la tendina dei nomi, il compagno abituale, il salto di campo con Invio
+  attachAC($("#riG1"), { onPick:()=>{ aggiornaNoteG2(); $("#riG2").focus(); } });
+  attachAC($("#riG2"), { noteFn:aggiornaNoteG2, onPick:()=>{ $("#riMP").focus(); } });
+  attachAC($("#mgFrom"), {});
+  attachAC($("#mgTo"), {});
+  $("#riG1").addEventListener("blur", ()=> setTimeout(aggiornaNoteG2,180));
+  $("#riMP").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#riVP").focus(); } });
+  $("#riVP").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addEditRow(); } });
+  $("#riTappa").onchange = ()=>{ aggiornaDashCoppie(); aggiornaNoteG2(); };
   drawEditRows();
   drawSavedRows();
   aggiornaSegno();
+  aggiornaDashCoppie();
   if(editRows.length) setStatus(editRows.length+" "+plural(editRows.length,"coppia rimasta","coppie rimaste")+" in coda dalla volta scorsa: sono ancora da salvare.","info");
 }
 
@@ -1163,7 +1228,9 @@ function addEditRow(){
   confermaDup = "";
   editRows.push({tappaId, g1:normName(g1), g2:normName(g2), mp, vp});
   $("#riG1").value=$("#riG2").value=$("#riMP").value=$("#riVP").value="";
-  $("#riG1").focus(); aggiornaSegno(); drawEditRows(); setStatus("","info");
+  $("#riG1").focus(); aggiornaSegno(); drawEditRows();
+  scriviNotaNome($("#riG1")); aggiornaNoteG2();
+  setStatus("","info");
 }
 /* Due errori che in serata capitano davvero: salvare due volte la stessa coppia,
    e iscrivere una persona a due tavoli della stessa sera. Meglio chiedere. */
@@ -1179,17 +1246,174 @@ function controllaDoppione(tappaId, g1, g2){
   editRows.filter(r=>r.tappaId===tappaId).forEach(r=>{ presenti.add(normName(r.g1)); presenti.add(normName(r.g2)); });
   const doppio = nomi.filter(n=> presenti.has(n));
   if(doppio.length) return doppio.join(" e ")+" "+plural(doppio.length,"risulta già","risultano già")+" in questa tappa con un altro compagno.";
+  // un nome nuovo che somiglia a uno già visto è quasi sempre un refuso
+  const noti = new Set(playersFromResults());
+  for(const n of nomi){
+    if(noti.has(resolveName(n))) continue;
+    const simili = nomiSimili(n);
+    if(simili.length) return `«${n}» sarebbe un giocatore nuovo, ma somiglia a ${simili.slice(0,2).join(" e ")}.`;
+  }
   return "";
 }
 function drawEditRows(){
   saveQueue();
   const box=$("#editRows"); if(!box) return;
-  if(!editRows.length){ box.innerHTML='<div class="ri muted">Nessuna coppia in coda. Aggiungine sopra.</div>'; return; }
-  box.innerHTML = editRows.map((r,i)=>`<div class="ri">
-    <span class="nomi">${esc(r.g1)} / ${esc(r.g2)}</span>
-    <span class="tag">MP ${fmtMP(r.mp)}</span><span class="tag">VP ${r.vp}</span>
-    <span class="x" data-i="${i}">✕</span></div>`).join("");
-  $$(".x",box).forEach(x=> x.onclick=()=>{ editRows.splice(+x.dataset.i,1); drawEditRows(); });
+  if(!editRows.length){ box.innerHTML='<div class="ri muted">Nessuna coppia in coda. Aggiungine sopra.</div>'; }
+  else{
+    box.innerHTML = editRows.map((r,i)=>`<div class="ri">
+      <span class="nomi">${esc(r.g1)} / ${esc(r.g2)}</span>
+      <span class="tag">MP ${fmtMP(r.mp)}</span><span class="tag">VP ${r.vp}</span>
+      <span class="x" data-i="${i}">✕</span></div>`).join("");
+    $$(".x",box).forEach(x=> x.onclick=()=>{ editRows.splice(+x.dataset.i,1); drawEditRows(); });
+  }
+  const sb=$("#saveRowsBtn");
+  if(sb) sb.textContent = editRows.length
+    ? `💾 Salva ${editRows.length} ${plural(editRows.length,"risultato","risultati")} su GitHub`
+    : "💾 Salva risultati su GitHub";
+  aggiornaDashCoppie();
+}
+
+/* ============================================================
+   AUTOCOMPILAZIONE
+   La tendina dei nomi già visti, l'avviso sui nomi nuovi che
+   somigliano a un refuso, il compagno abituale proposto da solo.
+   ============================================================ */
+function attachAC(input, opts={}){
+  if(!input) return;
+  const field = input.closest(".field"); if(!field) return;
+  field.classList.add("ac");
+  const list = document.createElement("div");
+  list.className = "aclist"; list.hidden = true;
+  field.appendChild(list);
+  const nota = opts.noteFn || (()=> scriviNotaNome(input));
+  let items=[], sel=-1;
+  const chiudi = ()=>{ list.hidden=true; items=[]; sel=-1; };
+  const scegli = v =>{ input.value=v; chiudi(); nota(); if(opts.onPick) opts.onPick(v); };
+  const draw = ()=>{
+    const q = normName(input.value);
+    items = q ? playersFromResults().filter(p=> p.includes(q) && p!==q).slice(0,6) : [];
+    if(sel >= items.length) sel = items.length-1;
+    if(!items.length){ chiudi(); return; }
+    list.innerHTML = items.map((p,i)=>`<div class="ai${i===sel?" sel":""}" data-v="${esc(p)}">${hl(p,q)}</div>`).join("");
+    list.hidden = false;
+    // pointerdown, non click: parte prima del blur del campo, così la scelta non si perde
+    $$(".ai",list).forEach(el=> el.onpointerdown = e=>{ e.preventDefault(); scegli(el.dataset.v); });
+  };
+  input.addEventListener("input", ()=>{ sel=-1; draw(); nota(); });
+  input.addEventListener("focus", draw);
+  input.addEventListener("blur", ()=> setTimeout(chiudi,150));
+  input.addEventListener("keydown", e=>{
+    if(e.key==="ArrowDown" && !list.hidden){ e.preventDefault(); sel=Math.min(sel+1, items.length-1); draw(); }
+    else if(e.key==="ArrowUp" && !list.hidden){ e.preventDefault(); sel=Math.max(sel-1, 0); draw(); }
+    else if(e.key==="Enter"){
+      e.preventDefault();
+      if(!list.hidden && sel>=0) scegli(items[sel]);
+      else{ chiudi(); nota(); if(opts.onPick) opts.onPick(input.value); }
+    }
+    else if(e.key==="Escape") chiudi();
+  });
+}
+/* distanza di battitura tra due nomi (quante lettere cambiano) */
+function lev(a,b){
+  const m=a.length, n=b.length;
+  if(Math.abs(m-n)>2) return 3;
+  let prev = Array.from({length:n+1},(_,j)=>j);
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++)
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    prev=cur;
+  }
+  return prev[n];
+}
+function nomiSimili(nome){
+  const n = normName(nome);
+  if(n.length<5) return [];
+  return playersFromResults().filter(p=> p!==n && lev(p,n)<=2);
+}
+/* Sotto al campo del nome: se il nome è nuovo lo dice, e se somiglia troppo a
+   uno già visto propone quello — è così che nascono i doppioni tipo
+   BALISTIERI/BALISTRIERI. */
+function scriviNotaNome(input){
+  if(!input) return;
+  const note = input.closest(".field").querySelector(".acnote"); if(!note) return;
+  const v = normName(input.value);
+  if(!v){ note.innerHTML=""; return; }
+  if(new Set(playersFromResults()).has(resolveName(v))){ note.innerHTML=""; return; }
+  const simili = nomiSimili(v);
+  if(simili.length){
+    note.innerHTML = `⚠️ Nome mai visto, ma somiglia a ` +
+      simili.slice(0,3).map(s=>`<button type="button" class="chip" data-v="${esc(s)}">${esc(s)}</button>`).join(" ") +
+      ` — se è la stessa persona, tocca il nome giusto.`;
+    $$(".chip",note).forEach(b=> b.onclick = ()=>{ input.value=b.dataset.v; note.innerHTML=""; aggiornaNoteG2(); });
+  }else{
+    note.innerHTML = `<span class="tagnew">➕ Nome nuovo</span> prima presenza nel circuito`;
+  }
+}
+/* con chi ha giocato più spesso (a pari conteggio vince il più recente) */
+function partnerAbituale(nome){
+  const n = resolveName(nome); if(!n) return "";
+  const ordine = new Map(DATA.tappe.map(t=>[t.id, Number(t.numero)||0]));
+  const cont = new Map();
+  DATA.risultati.forEach(r=>{
+    const a=resolveName(r.g1), b=resolveName(r.g2);
+    const altro = a===n ? b : (b===n ? a : "");
+    if(!altro) return;
+    const o = cont.get(altro) || {volte:0, ultima:-1};
+    o.volte++; o.ultima = Math.max(o.ultima, ordine.get(r.tappaId) ?? -1);
+    cont.set(altro,o);
+  });
+  let best="", bo=null;
+  cont.forEach((o,k)=>{ if(!bo || o.volte>bo.volte || (o.volte===bo.volte && o.ultima>bo.ultima)){ bo=o; best=k; } });
+  return best;
+}
+function presentiInTappa(){
+  const tid = $("#riTappa") ? $("#riTappa").value : "";
+  const s = new Set();
+  DATA.risultati.filter(r=>r.tappaId===tid).forEach(r=>{ s.add(resolveName(r.g1)); s.add(resolveName(r.g2)); });
+  editRows.filter(r=>r.tappaId===tid).forEach(r=>{ s.add(resolveName(r.g1)); s.add(resolveName(r.g2)); });
+  return s;
+}
+/* La nota sotto al Giocatore 2 fa due mestieri: campo vuoto → propone il compagno
+   abituale del Giocatore 1; campo scritto → stesso avviso nomi-nuovi del G1. */
+function aggiornaNoteG2(){
+  const input = $("#riG2"), note = $("#riG2note");
+  if(!input || !note) return;
+  if(normName(input.value)){ scriviNotaNome(input); return; }
+  note.innerHTML = "";
+  const g1 = normName($("#riG1") ? $("#riG1").value : "");
+  if(!g1) return;
+  const p = partnerAbituale(g1);
+  if(!p || p===resolveName(g1) || presentiInTappa().has(p)) return;
+  note.innerHTML = `💡 Di solito gioca con <button type="button" class="chip" data-v="${esc(p)}">${esc(p)}</button>`;
+  $(".chip",note).onclick = ()=>{ input.value = p; note.innerHTML=""; $("#riMP").focus(); };
+}
+function prossimoNumero(){ return Math.max(0,...DATA.tappe.map(t=>Number(t.numero)||0))+1; }
+function aggiornaDashCoppie(){
+  const el = $("#dashCoppie"); if(!el) return;
+  const tid = $("#riTappa") ? $("#riTappa").value : "";
+  el.textContent = DATA.risultati.filter(r=>r.tappaId===tid).length
+                 + editRows.filter(r=>r.tappaId===tid).length;
+}
+/* un tocco solo: crea la tappa di stasera (numero e data da soli) e mette
+   il cursore sul primo nome */
+function avviaSerata(){
+  const num = prossimoNumero();
+  const luogo = $("#startLuogo") ? $("#startLuogo").value.trim() : "";
+  const id = "t"+Date.now();
+  DATA.tappe.push({id, numero:num, data:todayISO(), luogo:luogo||null});
+  const btn = $("#startBtn"); if(btn) btn.disabled = true;
+  setStatus("Creo la tappa "+num+"…","info");
+  saveData("Creata tappa "+num)
+    .then(()=>{
+      lastPodium=""; renderAdmin(); render();
+      setStatus("Tappa "+num+" creata: inserisci la prima coppia.","ok");
+      const g1=$("#riG1"); if(g1) g1.focus();
+    })
+    .catch(e=>{
+      DATA.tappe.pop(); if(btn) btn.disabled=false;
+      setStatus("Errore salvataggio: "+e.message,"err");
+    });
 }
 
 /* ============================================================
@@ -1211,6 +1435,7 @@ function drawSavedRows(){
   </div>`).join("");
   $$(".e",box).forEach(b=> b.onclick=()=> editSaved(+b.dataset.e));
   $$(".x",box).forEach(b=> b.onclick=()=> deleteSaved(+b.dataset.x));
+  aggiornaDashCoppie();
 }
 function editSaved(i){
   pendingDel = -1;
