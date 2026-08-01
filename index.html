@@ -463,6 +463,17 @@ details.admin[open]>summary{border-bottom:1px solid var(--line-soft)}
 }
 .chip:hover{background:var(--brass); color:#fff}
 .tagnew{color:var(--verdant); font-weight:700}
+/* import da Excel: il riquadro per incollare e l'anteprima */
+.field textarea{
+  width:100%; padding:11px 13px; border-radius:var(--r-sm); border:1px solid var(--line);
+  background:var(--card-2); color:var(--ink); font:inherit; font-size:15px; outline:0;
+  resize:vertical; min-height:64px; transition:border-color .2s, background .2s;
+}
+.field textarea:focus{border-color:var(--brass); background:var(--card)}
+.rowlist .ri.wrapri{flex-wrap:wrap}
+.rowlist .ri.salta{opacity:.5}
+.rowlist .ri .imp-nota{flex-basis:100%; font-size:12.5px; color:var(--brass); line-height:1.4}
+.rowlist .ri.salta .imp-nota{color:var(--ink-soft)}
 
 .footer{
   width:var(--wrap); margin:34px auto 0; padding-top:20px; border-top:1px solid var(--line);
@@ -1103,6 +1114,33 @@ function renderAdmin(){
     </div>
 
     <div class="section">
+      <h3>📥 Importa una tappa da Excel</h3>
+      <p class="hint">Scegli il file (.xlsx) con i fogli «classifica Nª tappa»: l'app legge le coppie
+        e le carica in un colpo solo. In alternativa, copia le righe in Excel e incollale qui sotto.</p>
+      <div class="row">
+        <div class="field"><label>File Excel</label>
+          <input type="file" id="impFile" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></div>
+        <div class="field" id="impSheetField" style="display:none"><label>Foglio</label>
+          <select id="impSheet"></select></div>
+      </div>
+      <div class="field"><label>Oppure incolla qui le righe copiate da Excel</label>
+        <textarea id="impPaste" placeholder="SPADARO MARIA&#9;CANNATA MARIA&#9;4890&#9;63"></textarea></div>
+      <div class="field"><label>Dove vanno questi risultati</label>
+        <select id="impDest">
+          <option value="nuova">➕ In una tappa nuova</option>
+          ${[...DATA.tappe].sort((a,b)=>b.numero-a.numero).map(t=>`<option value="${t.id}">${esc(tappaLabel(t))}</option>`).join("")}
+        </select></div>
+      <div class="row" id="impNuovaRow">
+        <div class="field"><label>Numero</label><input id="impNum" type="number" value="${prossimoNumero()}"></div>
+        <div class="field"><label>Data</label><input id="impData" type="date" value="${todayISO()}"></div>
+        <div class="field"><label>Luogo (facoltativo)</label><input id="impLuogo" value="${esc((ultima&&ultima.luogo)||"")}" placeholder="es. Circolo…"></div>
+      </div>
+      <div class="rowlist" id="impPreview" style="display:none"></div>
+      <p class="hint" id="impRiassunto" style="margin:8px 0 0"></p>
+      <button class="btn primary" id="impGo" style="display:none; margin-top:12px">📥 Importa e salva su GitHub</button>
+    </div>
+
+    <div class="section">
       <h3>🗂 Correggi o cancella un risultato già salvato</h3>
       <p class="hint">Se una sera un punteggio finisce storto, si sistema da qui. Anche una correzione
         lascia la sua traccia su GitHub: la versione di prima resta sempre recuperabile.</p>
@@ -1179,6 +1217,12 @@ function renderAdmin(){
   $("#riMP").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("#riVP").focus(); } });
   $("#riVP").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); addEditRow(); } });
   $("#riTappa").onchange = ()=>{ aggiornaDashCoppie(); aggiornaNoteG2(); };
+  $("#impFile").onchange = impLeggiFile;
+  $("#impSheet").onchange = impScegliFoglio;
+  $("#impPaste").addEventListener("input", impDaIncolla);
+  $("#impDest").onchange = impAggiorna;
+  $("#impGo").onclick = impImporta;
+  impRipristina();
   drawEditRows();
   drawSavedRows();
   aggiornaSegno();
@@ -1414,6 +1458,248 @@ function avviaSerata(){
       DATA.tappe.pop(); if(btn) btn.disabled=false;
       setStatus("Errore salvataggio: "+e.message,"err");
     });
+}
+
+/* ============================================================
+   IMPORT DA EXCEL
+   Un file .xlsx è uno zip: si apre con DecompressionStream del
+   browser e si legge l'XML con DOMParser — nessuna libreria.
+   In riserva c'è il riquadro dove incollare le righe copiate.
+   ============================================================ */
+let IMP = {sheets:null, rows:[], fonte:""};
+
+function unzipXlsx(buf){
+  const b = new Uint8Array(buf), dv = new DataView(buf);
+  let eocd = -1;
+  for(let i=b.length-22; i>=Math.max(0,b.length-22-65535); i--){
+    if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; }
+  }
+  if(eocd<0) throw new Error("non sembra un file Excel (.xlsx)");
+  const n = dv.getUint16(eocd+10,true), cdOff = dv.getUint32(eocd+16,true);
+  const files = {}, td = new TextDecoder();
+  let p = cdOff;
+  for(let k=0;k<n;k++){
+    if(dv.getUint32(p,true)!==0x02014b50) break;
+    const method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true),
+          nlen=dv.getUint16(p+28,true), elen=dv.getUint16(p+30,true), clen=dv.getUint16(p+32,true),
+          lho=dv.getUint32(p+42,true);
+    const name = td.decode(b.subarray(p+46,p+46+nlen));
+    // il local header ripete nome ed extra con lunghezze proprie
+    const lnlen=dv.getUint16(lho+26,true), lelen=dv.getUint16(lho+28,true);
+    const start=lho+30+lnlen+lelen;
+    files[name] = {method, data:b.subarray(start,start+csize)};
+    p += 46+nlen+elen+clen;
+  }
+  return files;
+}
+async function zipRead(files, name){
+  const f = files[name]; if(!f) return null;
+  if(f.method===0) return new TextDecoder().decode(f.data);
+  if(typeof DecompressionStream==="undefined")
+    throw new Error("questo browser non sa aprire gli .xlsx — incolla le righe nel riquadro");
+  const ds = new DecompressionStream("deflate-raw");
+  const out = await new Response(new Blob([f.data]).stream().pipeThrough(ds)).arrayBuffer();
+  return new TextDecoder().decode(out);
+}
+function colToNum(ref){
+  let n=0;
+  for(const ch of String(ref)){ const c=ch.charCodeAt(0); if(c>=65&&c<=90) n=n*26+c-64; else break; }
+  return n;
+}
+async function leggiXlsx(buf){
+  const files = unzipXlsx(buf);
+  const xml = s => new DOMParser().parseFromString(s,"text/xml");
+  const sst = [];
+  const sstRaw = await zipRead(files,"xl/sharedStrings.xml");
+  if(sstRaw) [...xml(sstRaw).getElementsByTagName("si")].forEach(si=>{
+    sst.push([...si.getElementsByTagName("t")].map(t=>t.textContent).join(""));
+  });
+  const wb  = xml(await zipRead(files,"xl/workbook.xml"));
+  const rel = xml(await zipRead(files,"xl/_rels/workbook.xml.rels"));
+  const rmap = {};
+  [...rel.getElementsByTagName("Relationship")].forEach(r=> rmap[r.getAttribute("Id")] = r.getAttribute("Target").replace(/^\//,""));
+  const sheets = [];
+  for(const sh of [...wb.getElementsByTagName("sheet")]){
+    const rid = sh.getAttribute("r:id") ||
+      sh.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id");
+    let target = rmap[rid]; if(!target) continue;
+    if(!/^xl\//.test(target)) target = "xl/"+target;
+    const raw = await zipRead(files,target); if(!raw) continue;
+    const righe = [];
+    for(const row of [...xml(raw).getElementsByTagName("row")]){
+      const cells = [];
+      for(const c of [...row.getElementsByTagName("c")]){
+        const t = c.getAttribute("t");
+        let v;
+        if(t==="inlineStr"){ v = c.textContent; }
+        else{
+          const ve = c.getElementsByTagName("v")[0];
+          if(!ve) continue;
+          v = ve.textContent;
+          if(t==="s") v = sst[+v] ?? "";
+        }
+        if(String(v).trim()!=="") cells.push({col:colToNum(c.getAttribute("r")||""), v:String(v)});
+      }
+      if(cells.length) righe.push(cells.sort((a,b)=>a.col-b.col).map(c=>c.v));
+    }
+    sheets.push({nome: sh.getAttribute("name")||"foglio", righe});
+  }
+  return sheets;
+}
+/* Da una riga qualsiasi a {g1,g2,mp,vp}: due celle di testo (i nomi) e almeno
+   due numeri; gli ultimi due numeri sono MP e VP, un eventuale numero davanti
+   è la posizione e si ignora. Le intestazioni non passano il filtro. */
+function rigaCoppia(cells){
+  const testo=[], numeri=[];
+  (cells||[]).forEach(v=>{
+    const s=String(v).trim(); if(!s) return;
+    if(/^[+-]?[\d.,\s]+$/.test(s) && !isNaN(parseNum(s))) numeri.push(parseNum(s));
+    else testo.push(s);
+  });
+  if(testo.length===1 && /\s[\/\-–]\s/.test(testo[0])){
+    const parti = testo[0].split(/\s[\/\-–]\s/);
+    if(parti.length===2){ testo.length=0; testo.push(parti[0],parti[1]); }
+  }
+  if(testo.length!==2 || numeri.length<2) return null;
+  const mp = numeri[numeri.length-2], vp = numeri[numeri.length-1];
+  return {g1:normName(testo[0]), g2:normName(testo[1]), mp, vp};
+}
+function parseIncollato(txt){
+  return String(txt).split(/\r?\n/)
+    .map(line=> rigaCoppia(line.includes("\t") ? line.split("\t") : line.split(";")))
+    .filter(Boolean);
+}
+async function impLeggiFile(e){
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  try{
+    setStatus("Leggo «"+f.name+"»…","info");
+    const sheets = await leggiXlsx(await f.arrayBuffer());
+    IMP.sheets = sheets.map(s=>({nome:s.nome, coppie:s.righe.map(rigaCoppia).filter(Boolean)}))
+                       .filter(s=>s.coppie.length);
+    if(!IMP.sheets.length) throw new Error("nessun foglio con righe nome·nome·MP·VP");
+    const sel = $("#impSheet");
+    sel.innerHTML = IMP.sheets.map((s,i)=>`<option value="${i}">${esc(s.nome)} · ${s.coppie.length} coppie</option>`).join("");
+    $("#impSheetField").style.display="";
+    // preseleziona il primo foglio-tappa con un numero non ancora caricato
+    const numeriMiei = new Set(DATA.tappe.map(t=>Number(t.numero)));
+    const idx = IMP.sheets.findIndex(s=>{
+      const m = s.nome.match(/(\d+)/);
+      return /tappa/i.test(s.nome) && m && !numeriMiei.has(+m[1]);
+    });
+    sel.value = String(idx>=0?idx:0);
+    impScegliFoglio();
+    setStatus("File letto: controlla l'anteprima qui sotto.","ok");
+  }catch(err){
+    IMP = {sheets:null, rows:[], fonte:""};
+    $("#impSheetField").style.display="none";
+    impAggiorna();
+    setStatus("Non riesco a leggere il file: "+err.message,"err");
+  }
+}
+function impScegliFoglio(){
+  const s = IMP.sheets && IMP.sheets[+$("#impSheet").value]; if(!s) return;
+  IMP.rows = s.coppie; IMP.fonte = s.nome;
+  const m = s.nome.match(/(\d+)/);
+  if(m && $("#impNum")) $("#impNum").value = +m[1];
+  impAggiorna();
+}
+function impDaIncolla(){
+  const rows = parseIncollato($("#impPaste").value);
+  if(!rows.length && !$("#impPaste").value.trim()) return;   // riquadro svuotato: lascia stare
+  IMP.rows = rows; IMP.fonte = "righe incollate";
+  impAggiorna();
+}
+/* l'anteprima: cosa entra, cosa si salta e perché */
+function impAggiorna(){
+  const nuovaRow = $("#impNuovaRow");
+  if(nuovaRow) nuovaRow.style.display = $("#impDest").value==="nuova" ? "" : "none";
+  const box=$("#impPreview"), rias=$("#impRiassunto"), go=$("#impGo");
+  if(!box) return;
+  if(!IMP.rows.length){
+    box.style.display="none"; go.style.display="none"; rias.textContent="";
+    IMP.pronte = [];
+    return;
+  }
+  const dest = $("#impDest").value;
+  const giaSalvate = new Set();
+  if(dest!=="nuova")
+    DATA.risultati.filter(r=>r.tappaId===dest).forEach(r=> giaSalvate.add(coppiaKey(r.g1,r.g2)));
+  const noti = new Set(playersFromResults());
+  const visti = new Set(), contaNome = new Map();
+  let avvisi = 0;
+  const righe = IMP.rows.map(r=>{
+    const k = coppiaKey(r.g1,r.g2), note = [];
+    let salta = false;
+    if(giaSalvate.has(k)){ salta=true; note.push("già salvata in questa tappa: si salta"); }
+    else if(visti.has(k)){ salta=true; note.push("doppione dentro al file: si salta"); }
+    visti.add(k);
+    if(!salta) [r.g1,r.g2].forEach(n=>{
+      contaNome.set(n,(contaNome.get(n)||0)+1);
+      if(!noti.has(resolveName(n))){
+        const sim = nomiSimili(n);
+        if(sim.length){ avvisi++; note.push(`«${n}» è nuovo ma somiglia a ${sim[0]}: se è la stessa persona, dopo l'import usa «unisci duplicati»`); }
+      }
+    });
+    return {...r, note, salta};
+  });
+  righe.forEach(r=>{ if(!r.salta) [r.g1,r.g2].forEach(n=>{
+    if(contaNome.get(n)>1 && !r.note.some(x=>x.startsWith(n))) { r.note.push(n+" compare più volte nel file"); avvisi++; }
+  }); });
+  IMP.pronte = righe.filter(r=>!r.salta);
+  const saltate = righe.length - IMP.pronte.length;
+  box.style.display="";
+  box.innerHTML = righe.map(r=>`<div class="ri wrapri${r.salta?" salta":""}">
+    <span class="nomi">${esc(r.g1)} / ${esc(r.g2)}</span>
+    <span class="tag">MP ${fmtMP(r.mp)}</span><span class="tag">VP ${r.vp}</span>
+    ${r.note.length?`<span class="imp-nota">${r.salta?"⏭":"⚠️"} ${esc(r.note.join(" · "))}</span>`:""}
+  </div>`).join("");
+  let extra = "";
+  if(dest==="nuova"){
+    const num = parseInt($("#impNum") && $("#impNum").value);
+    if(num && DATA.tappe.some(t=>Number(t.numero)===num))
+      extra = ` ⚠️ Esiste già una tappa ${num}: controlla il numero.`;
+  }
+  rias.innerHTML = `Da «${esc(IMP.fonte)}»: <b>${IMP.pronte.length}</b> ${plural(IMP.pronte.length,"coppia pronta","coppie pronte")}`
+    + (saltate?`, ${saltate} ${plural(saltate,"saltata","saltate")}`:"")
+    + (avvisi?`, ${avvisi} ${plural(avvisi,"avviso","avvisi")}`:"") + "." + extra;
+  go.style.display = IMP.pronte.length ? "" : "none";
+  go.textContent = `📥 Importa e salva su GitHub (${IMP.pronte.length} ${plural(IMP.pronte.length,"coppia","coppie")})`;
+}
+/* dopo un ridisegno del pannello l'elenco fogli va ricostruito dallo stato */
+function impRipristina(){
+  if(IMP.sheets && $("#impSheet")){
+    $("#impSheet").innerHTML = IMP.sheets.map((s,i)=>`<option value="${i}">${esc(s.nome)} · ${s.coppie.length} coppie</option>`).join("");
+    const i = IMP.sheets.findIndex(s=>s.nome===IMP.fonte);
+    if(i>=0) $("#impSheet").value = String(i);
+    $("#impSheetField").style.display="";
+  }
+  impAggiorna();
+}
+async function impImporta(){
+  const buone = IMP.pronte || [];
+  if(!buone.length) return setStatus("Niente da importare.","err");
+  const bakT = DATA.tappe.slice(), bakR = DATA.risultati.slice();
+  let tid = $("#impDest").value, labelTappa;
+  if(tid==="nuova"){
+    const num = parseInt($("#impNum").value)||prossimoNumero();
+    const t = {id:"t"+Date.now(), numero:num, data:$("#impData").value||null, luogo:$("#impLuogo").value.trim()||null};
+    DATA.tappe.push(t); tid = t.id; labelTappa = "tappa "+num;
+  }else{
+    const t = tappaById(tid); labelTappa = t ? ("tappa "+t.numero) : "tappa";
+  }
+  buone.forEach(r=> DATA.risultati.push({tappaId:tid, g1:r.g1, g2:r.g2, mp:r.mp, vp:r.vp}));
+  $("#impGo").disabled = true;
+  setStatus("Importo "+buone.length+" risultati…","info");
+  try{
+    await saveData(`Importati ${buone.length} risultati (${labelTappa}) da ${IMP.fonte}`);
+    IMP = {sheets:null, rows:[], fonte:""};
+    lastPodium=""; renderAdmin(); render();
+    setStatus(buone.length+" risultati importati e salvati! Controlla la scheda Tappe.","ok");
+  }catch(e){
+    DATA.tappe = bakT; DATA.risultati = bakR;
+    const go=$("#impGo"); if(go) go.disabled = false;
+    setStatus("Errore: "+e.message,"err");
+  }
 }
 
 /* ============================================================
